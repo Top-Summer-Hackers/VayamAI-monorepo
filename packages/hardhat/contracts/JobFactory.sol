@@ -87,20 +87,19 @@ contract JobFactory is OwnableUpgradeable, UUPSUpgradeable{
         jobs[jobAddress] = Job(description, bountyAmount, duration, msg.sender, freelancer, false, false, false);
         jobAddresses.push(jobAddress);
 
-        emit JobCreated(msg.sender, jobAddress);
+        emit JobCreated(msg.sender, jobAddress); 
     }
     
-  function setBountyPrice(uint256 _bountyPrice) external view returns (uint256) {
-    bountyAmount = _bountyPrice;
+
+  function hasJob(address _address) public view returns (bool){
+    return JobCounters[_address] != 0;
   }
 
-  function settleJob() public {
-    require(Job.status = Status.IN_PROGRESS);
+}
 
-    Job.status = Status.COMPLETED;
-  }
 
-  function fundJob() public {
-    require(Job.status = Status.IN_PROGRESS);
-  }
+
+
+
+
 }

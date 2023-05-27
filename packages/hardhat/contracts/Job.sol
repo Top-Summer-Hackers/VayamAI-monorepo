@@ -6,14 +6,21 @@ import "hardhat/console.sol";
 // Use openzeppelin to inherit battle-tested implementations (ERC20, ERC721, etc)
 // import "@openzeppelin/contracts/access/Ownable.sol";
 
+import './interfaces/IJob.sol';
+
+
 /**
  * A smart contract that represents the Job created by an employer for a freelancer after agreement
  * @author Mehdi 
  */
-contract Job {
+contract Job is IJob {
 
+    // enum Status {OPEN, IN_PROGRESS, COMPLETED, ABANDONNED, DELETED}
+    // enum InvoiceStatus {NOT_STARTED,FUNDED, STARTED, PARTIAL, PAID, SETTLED}
 
-    enum Status {OPEN, IN_PROGRESS, COMPLETED, ABANDONNED, DELETED}
+    uint256 public duration;
+
+    JobStatus public override status;
 
     struct Job {
         Status status; 
@@ -46,6 +53,17 @@ contract Job {
 
     }
 
+    function setupJob (
+        address _freelancer, 
+        address _employer, 
+        address _invoiceContract
+    ) public {
+        require(_freelancer != address(0), 'Invalid freelancer');
+        require(_employer != address(0), 'Invalid employer');
+        require(_invoiceContract != address(0), 'Invalid invoice');
+
+    }
+
     function setBountyPrice(uint256 _bountyPrice) external view returns (uint256) {
         bountyAmount = _bountyPrice; 
     }
@@ -56,18 +74,24 @@ contract Job {
         Job.status = Status.COMPLETED;
     }
 
+    function millestonePayout() external notPaid {
+        require(status != JobStatus.Paid);
+        uint256 balance = getBalance();
+        // TO DO : add escrowInvoice logic 
+    }
+
     function fundJob() public {
         require(Job.status = Status.IN_PROGRESS);
         
     }
 
-    
 
-    
+    modifier notExpired() {
+        require(duration > block.timestamp, 'Contract expired'); // solhint-disable-line not-rely-on-time
+        _;
+    }
 
-
-
-
-
-   
+    modifier notPaid() {
+        require()
+    }
 }
