@@ -112,6 +112,12 @@ module.exports = {
         "pulse-fast": "pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite",
         zoom: "zoom 1s ease infinite",
       },
+      colors: {
+        primary: "#C885FE",
+        secondary: "#CE09BB",
+        tertiary: "#343434",
+        sideColor: "#D912C5",
+      },
     },
   },
 };

@@ -1,3 +1,9 @@
+# Available routes
+/ => home page (landing page) <br />
+/provider-dashboard =>  provider dashboard <br />
+/search/[anyword] => search result <br/>
+/job/[id] => job detail page <br />
+
 # 🏗 Scaffold-ETH 2
 
 🧪 An open-source, up-to-date toolkit for building decentralized applications (dapps) on the Ethereum blockchain. It's designed to make it easier for developers to create and deploy smart contracts and build user interfaces that interact with those contracts.

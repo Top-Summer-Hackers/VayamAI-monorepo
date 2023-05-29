@@ -1,58 +1,27 @@
-import Head from "next/head";
-import Link from "next/link";
 import type { NextPage } from "next";
-import { BugAntIcon, SparklesIcon } from "@heroicons/react/24/outline";
 
 const Home: NextPage = () => {
   return (
-    <>
-      <Head>
-        <title>Scaffold-ETH 2 App</title>
-        <meta name="description" content="Created with 🏗 scaffold-eth-2" />
-      </Head>
-
-      <div className="flex items-center flex-col flex-grow pt-10">
-        <div className="px-5">
-          <h1 className="text-center mb-8">
-            <span className="block text-2xl mb-2">Welcome to</span>
-            <span className="block text-4xl font-bold">Scaffold-ETH 2</span>
-          </h1>
-          <p className="text-center text-lg">
-            Get started by editing{" "}
-            <code className="italic bg-base-300 text-base font-bold">packages/nextjs/pages/index.tsx</code>
-          </p>
-          <p className="text-center text-lg">
-            Edit your smart contract <code className="italic bg-base-300 text-base font-bold">YourContract.sol</code> in{" "}
-            <code className="italic bg-base-300 text-base font-bold">packages/hardhat/contracts</code>
-          </p>
-        </div>
-
-        <div className="flex-grow bg-base-300 w-full mt-16 px-8 py-12">
-          <div className="flex justify-center items-center gap-12 flex-col sm:flex-row">
-            <div className="flex flex-col bg-base-100 px-10 py-10 text-center items-center max-w-xs rounded-3xl">
-              <BugAntIcon className="h-8 w-8 fill-secondary" />
-              <p>
-                Tinker with your smart contract using the{" "}
-                <Link href="/debug" passHref className="link">
-                  Debug Contract
-                </Link>{" "}
-                tab.
-              </p>
-            </div>
-            <div className="flex flex-col bg-base-100 px-10 py-10 text-center items-center max-w-xs rounded-3xl">
-              <SparklesIcon className="h-8 w-8 fill-secondary" />
-              <p>
-                Experiment with{" "}
-                <Link href="/example-ui" passHref className="link">
-                  Example UI
-                </Link>{" "}
-                to build your own UI.
-              </p>
-            </div>
+    <main>
+      <div className="w-[80%] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-5">
+        {/* introduction */}
+        <div className="flex flex-col items-start justify-center gap-5">
+          <div className="w-full">
+            <h2 className="w-full text-3xl font-bold text-center lg:text-left">Revolutionizing Freelancing</h2>
+            <h4 className="mt-5 text-lg lg:text-xl font-semibold text-center lg:text-left">
+              The Future of Decentralized Employment
+            </h4>
+          </div>
+          <div className="mx-auto lg:mx-0 mt-5 w-fit connect-bg px-8 py-2 rounded-full font-semibold cursor-pointer">
+            Explore now
           </div>
         </div>
+        {/* image */}
+        <div>
+          <img src="/landing/landing_image.png" alt="landing's image" />
+        </div>
       </div>
-    </>
+    </main>
   );
 };
 
