@@ -1,3 +1,4 @@
+import ProviderDashboard from "./ProviderDashboard";
 import TaskList from "./TaskList";
 
-export { TaskList };
+export { TaskList, ProviderDashboard };

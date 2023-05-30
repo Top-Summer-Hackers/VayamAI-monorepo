@@ -1,5 +1,11 @@
-import { Fragment, useState } from "react";
+import { Fragment, useContext, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
+import { BigNumber } from "ethers";
+import keccak256 from "keccak256";
+import { toast } from "react-hot-toast";
+import VayamAIContext from "~~/context/context";
+import { useScaffoldContractRead, useScaffoldContractWrite } from "~~/hooks/scaffold-eth";
+import { RegisterAsProvider } from "~~/types/vayam-ai/RegisterAsProvider";
 
 interface MyModalProps {
   isOpen: boolean;
@@ -7,10 +13,66 @@ interface MyModalProps {
 }
 
 export default function MyModal({ isOpen, setIsOpen }: MyModalProps) {
-  const [selectedRole, setSelectedRole] = useState("provider");
+  const { userIdRefetch } = useContext(VayamAIContext);
+
+  const [selectedRole, setSelectedRole] = useState("freelancer");
+  const [authenticationInformation, setAuthenticationInformation] = useState<RegisterAsProvider>({
+    user_name: "",
+    password: "",
+    description: "",
+  });
+
+  // get user count from smart contract
+  const { data: userCount } = useScaffoldContractRead({
+    contractName: "VayamAI",
+    functionName: "userCount",
+  });
+
+  // register user on smart contract
+  const { writeAsync: registerAsUser, isLoading: registerAsUserLoading } = useScaffoldContractWrite({
+    contractName: "VayamAI",
+    functionName: "registerAsUser",
+    args: [
+      ("0x" + keccak256(JSON.stringify(authenticationInformation)).toString("hex")) as `0x${string}`,
+      ("0x" + keccak256(selectedRole).toString("hex")) as `0x${string}`,
+      userCount,
+    ] as readonly [`0x${string}` | undefined, `0x${string}` | undefined, BigNumber | undefined],
+    onSuccess: () => {
+      setAuthenticationInformation({
+        user_name: "",
+        password: "",
+        description: "",
+      });
+      setIsOpen(false);
+      userIdRefetch();
+    },
+  });
 
   function closeModal() {
     setIsOpen(false);
+  }
+
+  function handleOnChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setAuthenticationInformation(prev => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
+  }
+
+  // when user click on the register/login button
+  function handleAuthentication() {
+    if (authenticationInformation.user_name.trim() === "" || authenticationInformation.password.trim() === "") {
+      return toast.error("Please fill in all the information!");
+    }
+
+    if (selectedRole === "freelancer") {
+      // provider (aka freelancer)
+      // TODO: submit a new provider
+      registerAsUser();
+    } else {
+      // client
+      registerAsUser();
+    }
   }
 
   return (
@@ -53,9 +115,9 @@ export default function MyModal({ isOpen, setIsOpen }: MyModalProps) {
                     {/* roles selection-provider/client */}
                     <div className="select-none w-full rounded-full grid grid-cols-2 overflow-hidden border border-primary">
                       <div
-                        onClick={() => setSelectedRole("provider")}
+                        onClick={() => setSelectedRole("freelancer")}
                         className={`font-semibold text-center cursor-pointer py-2 ${
-                          selectedRole === "provider" ? "connect-bg" : ""
+                          selectedRole === "freelancer" ? "connect-bg" : ""
                         }`}
                       >
                         Provider
@@ -74,7 +136,10 @@ export default function MyModal({ isOpen, setIsOpen }: MyModalProps) {
                     {/* email address / username */}
                     <div className="w-full">
                       <input
+                        value={authenticationInformation.user_name}
+                        onChange={handleOnChange}
                         type="text"
+                        name="user_name"
                         placeholder="Email Address / Username"
                         className="font-semibold w-full rounded-full border border-primary outline-none bg-transparent text-base px-4 py-2"
                       />
@@ -82,14 +147,20 @@ export default function MyModal({ isOpen, setIsOpen }: MyModalProps) {
                     {/* password */}
                     <div className="mt-5 w-full">
                       <input
+                        value={authenticationInformation.password}
+                        onChange={handleOnChange}
                         type="password"
+                        name="password"
                         placeholder="Password"
                         className="font-semibold w-full rounded-full border border-primary outline-none bg-transparent text-base px-4 py-2"
                       />
                     </div>
                     {/* login/register */}
-                    <div className="select-none mt-10 text-base cursor-pointer font-semibold w-full connect-bg rounded-full py-3 text-center">
-                      Login / Register
+                    <div
+                      onClick={handleAuthentication}
+                      className="select-none mt-10 text-base cursor-pointer font-semibold w-full connect-bg rounded-full py-3 text-center"
+                    >
+                      {registerAsUserLoading ? "Loading..." : "Login / Register"}
                     </div>
                   </div>
                 </Dialog.Panel>

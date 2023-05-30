@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { AppProps } from "next/app";
 import { RainbowKitProvider, darkTheme, lightTheme } from "@rainbow-me/rainbowkit";
 import "@rainbow-me/rainbowkit/styles.css";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import NextNProgress from "nextjs-progressbar";
 import { Toaster } from "react-hot-toast";
 import { useDarkMode } from "usehooks-ts";
@@ -10,12 +11,14 @@ import { Footer } from "~~/components/Footer";
 import { Header } from "~~/components/Header";
 import { BlockieAvatar } from "~~/components/scaffold-eth";
 import { Layout } from "~~/components/vayam-ai";
+import { VayamAIContextProvider } from "~~/context/context";
 import { useNativeCurrencyPrice } from "~~/hooks/scaffold-eth";
 import { useGlobalState } from "~~/services/store/store";
 import { wagmiClient } from "~~/services/web3/wagmiClient";
 import { appChains } from "~~/services/web3/wagmiConnectors";
 import "~~/styles/globals.css";
 
+const queryClient = new QueryClient();
 const ScaffoldEthApp = ({ Component, pageProps, router }: AppProps) => {
   const price = useNativeCurrencyPrice();
   const setNativeCurrencyPrice = useGlobalState(state => state.setNativeCurrencyPrice);
@@ -43,25 +46,30 @@ const ScaffoldEthApp = ({ Component, pageProps, router }: AppProps) => {
         avatar={BlockieAvatar}
         theme={isDarkTheme ? darkTheme() : lightTheme()}
       >
-        <div className="flex flex-col min-h-screen">
-          {isDebugPages ? (
-            <div className="flex flex-col min-h-screen">
-              <Header />
-              <main className="relative flex flex-col flex-1">
-                <Component {...pageProps} />
-              </main>
-              <Footer />
-            </div>
-          ) : (
-            <div className="flex flex-col min-h-screen">
-              <Layout>
-                <main className={`relative flex flex-col flex-1 `}>
+        <QueryClientProvider client={queryClient}>
+          <div className="flex flex-col min-h-screen">
+            {isDebugPages ? (
+              <div className="flex flex-col min-h-screen">
+                <Header />
+                <main className="relative flex flex-col flex-1">
                   <Component {...pageProps} />
                 </main>
-              </Layout>
-            </div>
-          )}
-        </div>
+                <Footer />
+              </div>
+            ) : (
+              <VayamAIContextProvider>
+                <div className="flex flex-col min-h-screen">
+                  <Layout>
+                    <main className={`relative flex flex-col flex-1 `}>
+                      <Component {...pageProps} />
+                    </main>
+                  </Layout>
+                </div>
+              </VayamAIContextProvider>
+            )}
+          </div>
+        </QueryClientProvider>
+
         <Toaster />
       </RainbowKitProvider>
     </WagmiConfig>

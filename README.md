@@ -1,6 +1,6 @@
 # Available routes
 / => home page (landing page) <br />
-/provider-dashboard =>  provider dashboard <br />
+/dashboard =>  provider dashboard / client dashboard <br />
 /search/[anyword] => search result <br/>
 /job/[id] => job detail page <br />
 
