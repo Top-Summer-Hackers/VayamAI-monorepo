@@ -6,6 +6,7 @@ import { useScaffoldContractRead } from "~~/hooks/scaffold-eth";
 interface VayamAIContextData {
   userId: BigNumber | undefined;
   userType: `0x${string}` | undefined;
+  userTypeLoading: boolean;
   freelancerKeccak256: string;
   clientKeccak256: string;
   userIdRefetch: (
@@ -21,6 +22,7 @@ interface VayamAIContextData {
 const VayamAIContext = createContext<VayamAIContextData>({
   userId: undefined,
   userType: undefined,
+  userTypeLoading: false,
   userIdRefetch: (options?: { throwOnError: boolean; cancelRefetch: boolean } | undefined): Promise<BigNumber> => {
     console.log(options);
     // This is an empty function with no implementation
@@ -44,7 +46,7 @@ export const VayamAIContextProvider = ({ children }: PropsWithChildren) => {
   });
 
   // read the user type, (provider or client)
-  const { data: userType } = useScaffoldContractRead({
+  const { data: userType, isLoading: userTypeLoading } = useScaffoldContractRead({
     contractName: "VayamAI",
     functionName: "userType",
     args: [address === undefined ? undefined : address] as readonly [string | undefined],
@@ -61,6 +63,7 @@ export const VayamAIContextProvider = ({ children }: PropsWithChildren) => {
       value={{
         userId,
         userType,
+        userTypeLoading,
         freelancerKeccak256,
         clientKeccak256,
         userIdRefetch,

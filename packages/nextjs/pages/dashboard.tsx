@@ -7,7 +7,7 @@ import VayamAIContext from "~~/context/context";
 
 const Dashboard = () => {
   const { address } = useAccount();
-  const { userType } = useContext(VayamAIContext);
+  const { userType, userTypeLoading } = useContext(VayamAIContext);
 
   return (
     <div>
@@ -15,7 +15,7 @@ const Dashboard = () => {
         <PleaseConnectWallet />
       ) : (
         <div>
-          {userType === undefined ? (
+          {userType === undefined || userTypeLoading ? (
             <div className="flex-center mt-10">
               <Loading />
             </div>
