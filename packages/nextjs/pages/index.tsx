@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { NextPage } from "next";
 
 const Home: NextPage = () => {
@@ -12,9 +13,11 @@ const Home: NextPage = () => {
               The Future of Decentralized Employment
             </h4>
           </div>
-          <div className="mx-auto lg:mx-0 mt-5 w-fit connect-bg px-8 py-2 rounded-full font-semibold cursor-pointer">
-            Explore now
-          </div>
+          <Link href={"/jobs"}>
+            <div className="mx-auto lg:mx-0 mt-5 w-fit connect-bg px-8 py-2 rounded-full font-semibold cursor-pointer">
+              Explore now
+            </div>
+          </Link>
         </div>
         {/* image */}
         <div>

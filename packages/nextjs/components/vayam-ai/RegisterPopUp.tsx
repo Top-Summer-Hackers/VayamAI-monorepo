@@ -1,5 +1,7 @@
 import { Fragment, useContext, useState } from "react";
+import { registerAsFreelancer } from "../../api/vayam-ai/authentication";
 import { Dialog, Transition } from "@headlessui/react";
+import { useMutation } from "@tanstack/react-query";
 import { BigNumber } from "ethers";
 import keccak256 from "keccak256";
 import { toast } from "react-hot-toast";
@@ -22,6 +24,9 @@ export default function MyModal({ isOpen, setIsOpen }: MyModalProps) {
     description: "",
   });
 
+  /*************************************************************
+   * Contract interaction
+   ************************************************************/
   // get user count from smart contract
   const { data: userCount } = useScaffoldContractRead({
     contractName: "VayamAI",
@@ -38,6 +43,20 @@ export default function MyModal({ isOpen, setIsOpen }: MyModalProps) {
       userCount,
     ] as readonly [`0x${string}` | undefined, `0x${string}` | undefined, BigNumber | undefined],
     onSuccess: () => {
+      if (selectedRole === "freelancer") {
+        registerAsFreelancerMutation.mutate(authenticationInformation);
+      } else {
+        registerAsClientMutation.mutate(authenticationInformation);
+      }
+    },
+  });
+
+  /*************************************************************
+   * Backend interaction
+   ************************************************************/
+  const registerAsFreelancerMutation = useMutation({
+    mutationFn: registerAsFreelancer,
+    onSuccess: () => {
       setAuthenticationInformation({
         user_name: "",
         password: "",
@@ -45,6 +64,27 @@ export default function MyModal({ isOpen, setIsOpen }: MyModalProps) {
       });
       setIsOpen(false);
       userIdRefetch();
+      toast.success("Registered as Freelancer!");
+    },
+    onError: (error: any) => {
+      toast.error(error.response.data.message);
+    },
+  });
+
+  const registerAsClientMutation = useMutation({
+    mutationFn: registerAsFreelancer,
+    onSuccess: () => {
+      setAuthenticationInformation({
+        user_name: "",
+        password: "",
+        description: "",
+      });
+      setIsOpen(false);
+      userIdRefetch();
+      toast.success("Registered as Client!");
+    },
+    onError: (error: any) => {
+      toast.error(error.response.data.message);
     },
   });
 
@@ -144,6 +184,16 @@ export default function MyModal({ isOpen, setIsOpen }: MyModalProps) {
                         className="font-semibold w-full rounded-full border border-primary outline-none bg-transparent text-base px-4 py-2"
                       />
                     </div>
+                    <div className="mt-5 w-full">
+                      <input
+                        value={authenticationInformation.description}
+                        onChange={handleOnChange}
+                        type="description"
+                        name="description"
+                        placeholder="Role (Auditor etc.)"
+                        className="font-semibold w-full rounded-full border border-primary outline-none bg-transparent text-base px-4 py-2"
+                      />
+                    </div>
                     {/* password */}
                     <div className="mt-5 w-full">
                       <input
@@ -160,7 +210,11 @@ export default function MyModal({ isOpen, setIsOpen }: MyModalProps) {
                       onClick={handleAuthentication}
                       className="select-none mt-10 text-base cursor-pointer font-semibold w-full connect-bg rounded-full py-3 text-center"
                     >
-                      {registerAsUserLoading ? "Loading..." : "Login / Register"}
+                      {registerAsClientMutation.isLoading ||
+                      registerAsFreelancerMutation.isLoading ||
+                      registerAsUserLoading
+                        ? "Loading..."
+                        : "Login / Register"}
                     </div>
                   </div>
                 </Dialog.Panel>
