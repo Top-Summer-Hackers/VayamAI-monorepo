@@ -1,5 +1,22 @@
 # VayamAI - Freelancing x Web3 x Ai Community
 
+## Quick Start
+```
+clone the repo https://github.com/Top-Summer-Hackers/VayamAI-monorepo.git
+cd into it
+run yarn install
+run yarn chain
+run yarn deploy
+run yarn start
+
+Available routes:
+/ => landing page
+/jobs => list of jobs
+/dahsboard => client/provider dashboard (depends on the role selected when register)
+/profile => user profile
+/search/[keyword] => display a list of search results
+/job/[id] => task/job detail
+```
 
 ## Figma designs
 https://www.figma.com/file/5JNdvO4xqMW83rUdT7SQkR/vayam-ai?type=design&node-id=3%3A2&t=cFDzZEfAlHLzxXJw-1

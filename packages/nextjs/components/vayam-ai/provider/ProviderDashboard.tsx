@@ -5,7 +5,7 @@ const ProviderDashboard = () => {
   return (
     <div className="px-5">
       {/* job title */}
-      <div className="text-3xl font-bold mt-5">Task List</div>
+      <div className="text-3xl font-bold mt-5">Task List (Provider)</div>
       <div className="relative mt-5 w-full grid grid-cols-1 lg:grid-cols-2 gap-10">
         {/* list of tasks */}
         <div className="lg:after:absolute lg:after:left-[50%] lg:after:-translate-x-[50%] lg:after:content-[''] lg:after:h-full lg:after:w-[2px] lg:after:bg-white flex flex-col gap-8">

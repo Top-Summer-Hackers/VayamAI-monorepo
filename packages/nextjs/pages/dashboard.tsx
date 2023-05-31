@@ -2,6 +2,7 @@ import React, { useContext } from "react";
 import keccak256 from "keccak256";
 import { useAccount } from "wagmi";
 import { Loading, PleaseConnectWallet } from "~~/components/vayam-ai";
+import ClientDashboard from "~~/components/vayam-ai/client/ClientDashboard";
 import { ProviderDashboard } from "~~/components/vayam-ai/provider";
 import VayamAIContext from "~~/context/context";
 
@@ -26,7 +27,9 @@ const Dashboard = () => {
               <ProviderDashboard />
             </div>
           ) : (
-            <div>client dashboard here</div>
+            <div>
+              <ClientDashboard />
+            </div>
           )}
         </div>
       )}

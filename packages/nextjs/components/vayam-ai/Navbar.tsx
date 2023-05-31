@@ -64,10 +64,20 @@ const Navbar = () => {
         <div className="flex-center gap-5">
           {address !== undefined ? (
             <div className="flex items-center gap-5">
+              <Link href={"/jobs"}>
+                {" "}
+                <div className="font-semibold cursor-pointer">jobs</div>
+              </Link>
               {userId != undefined && parseInt(String(userId).toString()) > 0 ? (
                 <Link href={"/dashboard"}>
                   {" "}
                   <div className="font-semibold cursor-pointer">dashboard</div>
+                </Link>
+              ) : null}
+              {userId != undefined && parseInt(String(userId).toString()) > 0 ? (
+                <Link href={"/profile"}>
+                  {" "}
+                  <div className="font-semibold cursor-pointer">profile</div>
                 </Link>
               ) : null}
 
@@ -96,7 +106,7 @@ const Navbar = () => {
           address === undefined ? "bottom-3" : "bottom-14"
         } block md:hidden rounded-full py-1 px-2 bg-[#191b1fc2] z-10 fixed  left-[50%] -translate-x-[50%]`}
       >
-        <div className="flex-center ">
+        <div className="flex-center border border-white rounded-full px-5 py-2">
           <div className="flex items-center gap-5">
             {userId != undefined && parseInt(String(userId).toString()) > 0 ? (
               <Link href={"/dashboard"}>
@@ -104,6 +114,16 @@ const Navbar = () => {
                 <div className="font-semibold cursor-pointer">dashboard</div>
               </Link>
             ) : null}
+            {userId != undefined && parseInt(String(userId).toString()) > 0 ? (
+              <Link href={"/profile"}>
+                {" "}
+                <div className="font-semibold cursor-pointer">profile</div>
+              </Link>
+            ) : null}
+            <Link href={"/jobs"}>
+              {" "}
+              <div className="font-semibold cursor-pointer">jobs</div>
+            </Link>
 
             {userId != undefined && parseInt(String(userId).toString()) <= 0 ? (
               <div
