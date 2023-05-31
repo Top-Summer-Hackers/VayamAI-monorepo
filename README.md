@@ -2,6 +2,8 @@
 
 ## Quick Start
 ```
+run backend https://github.com/Top-Summer-Hackers/Vayam-AI-backend-rs
+
 clone the repo https://github.com/Top-Summer-Hackers/VayamAI-monorepo.git
 cd into it
 run yarn install
