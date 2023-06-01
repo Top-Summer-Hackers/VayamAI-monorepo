@@ -1,7 +1,7 @@
 import React, { useContext, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { RegisterPopUp } from ".";
+import { RegisterPopUp, SubmitTaskPopup } from ".";
 import { ConnectButton, useConnectModal } from "@rainbow-me/rainbowkit";
 import { CiSearch } from "react-icons/ci";
 import { useAccount } from "wagmi";
@@ -11,12 +11,13 @@ const Navbar = () => {
   const router = useRouter();
 
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
+  const [isSubmitTaskOpen, setIsSubmitTaskOpen] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState("");
 
   const { isConnected: isWalletConnected, address } = useAccount();
   const { openConnectModal } = useConnectModal();
 
-  const { userId } = useContext(VayamAIContext);
+  const { userId, userType, clientKeccak256 } = useContext(VayamAIContext);
 
   async function connectWallet() {
     if (!isWalletConnected && openConnectModal) {
@@ -27,6 +28,7 @@ const Navbar = () => {
   return (
     <div className="max-w-[1980px] mx-auto mb-10 pt-5 flex items-center justify-between">
       <RegisterPopUp isOpen={isRegisterOpen} setIsOpen={setIsRegisterOpen} />
+      <SubmitTaskPopup isOpen={isSubmitTaskOpen} setIsOpen={setIsSubmitTaskOpen} />
       {/* logo/app name */}
       <Link href={"/"}>
         <div className="text-xl md:text-2xl lg:text-3xl font-bold">VayamAi</div>
@@ -64,6 +66,11 @@ const Navbar = () => {
         <div className="flex-center gap-5">
           {address !== undefined ? (
             <div className="flex items-center gap-5">
+              {userType != undefined && userType === clientKeccak256 && (
+                <div onClick={() => setIsSubmitTaskOpen(true)} className="font-semibold cursor-pointer">
+                  + add job
+                </div>
+              )}
               <Link href={"/jobs"}>
                 {" "}
                 <div className="font-semibold cursor-pointer">jobs</div>

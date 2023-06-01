@@ -88,6 +88,9 @@ export default function MyModal({ isOpen, setIsOpen }: MyModalProps) {
     },
   });
 
+  /*************************************************************
+   * Component functions
+   ************************************************************/
   function closeModal() {
     setIsOpen(false);
   }

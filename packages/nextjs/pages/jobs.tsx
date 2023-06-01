@@ -3,6 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { getAllTasks } from "~~/api/vayam-ai/tasks";
 import { Loading } from "~~/components/vayam-ai";
 import SomethingWentWrong from "~~/components/vayam-ai/SomethingWentWrong";
+import { ResultCard } from "~~/components/vayam-ai/search";
+import { TaskList } from "~~/types/vayam-ai/Task";
 
 // import { ResultCard } from "~~/components/vayam-ai/search";
 
@@ -31,9 +33,9 @@ const Jobs = () => {
         </div>
       ) : (
         <div className="mt-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {/* {allTasksQuery.data.tasks.map((task) => (
-            <ResultCard key={task.}/>
-          ))} */}
+          {allTasksQuery.data.tasks.map((task: TaskList) => (
+            <ResultCard key={task.id} taskDetail={task} />
+          ))}
         </div>
       )}
     </div>

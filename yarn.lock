@@ -1838,6 +1838,7 @@ __metadata:
     autoprefixer: ^10.4.12
     axios: ^1.4.0
     daisyui: ^2.31.0
+    dayjs: ^1.11.7
     eslint: ^8.15.0
     eslint-config-next: ^13.1.6
     eslint-config-prettier: ^8.5.0
@@ -1855,6 +1856,7 @@ __metadata:
     react-fast-marquee: ^1.3.5
     react-hot-toast: ^2.4.0
     react-icons: ^4.9.0
+    react-tailwindcss-datepicker: ^1.6.1
     tailwindcss: ^3.1.8
     typescript: ^4.9.5
     use-debounce: ^8.0.4
@@ -5527,6 +5529,13 @@ __metadata:
   dependencies:
     assert-plus: ^1.0.0
   checksum: 3634c249570f7f34e3d34f866c93f866c5b417f0dd616275decae08147dcdf8fccfaa5947380ccfb0473998ea3a8057c0b4cd90c875740ee685d0624b2983598
+  languageName: node
+  linkType: hard
+
+"dayjs@npm:^1.11.7":
+  version: 1.11.7
+  resolution: "dayjs@npm:1.11.7"
+  checksum: 5003a7c1dd9ed51385beb658231c3548700b82d3548c0cfbe549d85f2d08e90e972510282b7506941452c58d32136d6362f009c77ca55381a09c704e9f177ebb
   languageName: node
   linkType: hard
 
@@ -11315,6 +11324,16 @@ __metadata:
     "@types/react":
       optional: true
   checksum: 7ee8ef3aab74c7ae1d70ff34a27643d11ba1a8d62d072c767827d9ff9a520905223e567002e0bf6c772929d8ea1c781a3ba0cc4a563e92b1e3dc2eaa817ecbe8
+  languageName: node
+  linkType: hard
+
+"react-tailwindcss-datepicker@npm:^1.6.1":
+  version: 1.6.1
+  resolution: "react-tailwindcss-datepicker@npm:1.6.1"
+  peerDependencies:
+    dayjs: ^1.11.6
+    react: ^17.0.2 || ^18.2.0
+  checksum: 9d02ad7689ec8983c7632d4161f9239c5f4d7ffaef36799dcd4902f94f3b44728f6ca15f49e7d794696a5705f36fa0ce7e35f9ddea3edcef55900a1e9bcf2a71
   languageName: node
   linkType: hard
 
