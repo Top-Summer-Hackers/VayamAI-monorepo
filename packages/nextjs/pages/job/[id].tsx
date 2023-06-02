@@ -1,15 +1,35 @@
-import React from "react";
+import React, { useContext, useState } from "react";
 import { useRouter } from "next/router";
+import { IoMdAdd } from "react-icons/io";
+import { SubmitProposalPopUp } from "~~/components/vayam-ai";
 import { JobProposal } from "~~/components/vayam-ai/job";
+import VayamAIContext from "~~/context/context";
 
 const JobDetail = () => {
   const router = useRouter();
-  const { keyword } = router.query;
-  console.log(keyword);
+
+  const { userType, freelancerKeccak256 } = useContext(VayamAIContext);
+
+  const { id } = router.query;
+  console.log(id);
+
+  const [isSubmitProposalOpen, setIsSubmitProposalOpen] = useState(false);
+
   return (
     <div className="px-5">
+      <SubmitProposalPopUp id={String(id)} isOpen={isSubmitProposalOpen} setIsOpen={setIsSubmitProposalOpen} />
       {/* job title */}
-      <div className="text-3xl font-bold mt-5">Developer XXX - Job Title</div>
+      <div className="flex items-center justify-between mt-5">
+        <div className="text-3xl font-bold mt-5">Developer XXX - Job Title</div>
+        {userType != undefined && userType == freelancerKeccak256 && (
+          <div
+            onClick={() => setIsSubmitProposalOpen(true)}
+            className="cursor-pointer flex-center gap-1 border border-primary rounded-full px-5 py-2"
+          >
+            Submit Proposal <IoMdAdd />
+          </div>
+        )}
+      </div>
       {/* time range + job description */}
       <div className="mt-5 font-semibold text-lg">
         <div>Time range - time range</div>

@@ -5,6 +5,7 @@ import { useMutation } from "@tanstack/react-query";
 import { BigNumber } from "ethers";
 import keccak256 from "keccak256";
 import { toast } from "react-hot-toast";
+import { useAccount } from "wagmi";
 import VayamAIContext from "~~/context/context";
 import { useScaffoldContractRead, useScaffoldContractWrite } from "~~/hooks/scaffold-eth";
 import { RegisterAsProvider } from "~~/types/vayam-ai/RegisterAsProvider";
@@ -15,10 +16,13 @@ interface MyModalProps {
 }
 
 export default function MyModal({ isOpen, setIsOpen }: MyModalProps) {
+  const { address } = useAccount();
+
   const { userIdRefetch } = useContext(VayamAIContext);
 
   const [selectedRole, setSelectedRole] = useState("freelancer");
   const [authenticationInformation, setAuthenticationInformation] = useState<RegisterAsProvider>({
+    _id: "",
     user_name: "",
     password: "",
     description: "",
@@ -44,9 +48,15 @@ export default function MyModal({ isOpen, setIsOpen }: MyModalProps) {
     ] as readonly [`0x${string}` | undefined, `0x${string}` | undefined, BigNumber | undefined],
     onSuccess: () => {
       if (selectedRole === "freelancer") {
-        registerAsFreelancerMutation.mutate(authenticationInformation);
+        registerAsFreelancerMutation.mutate({
+          ...authenticationInformation,
+          _id: address!,
+        });
       } else {
-        registerAsClientMutation.mutate(authenticationInformation);
+        registerAsClientMutation.mutate({
+          ...authenticationInformation,
+          _id: address!,
+        });
       }
     },
   });
@@ -61,6 +71,7 @@ export default function MyModal({ isOpen, setIsOpen }: MyModalProps) {
         user_name: "",
         password: "",
         description: "",
+        _id: "",
       });
       setIsOpen(false);
       userIdRefetch();
@@ -78,6 +89,7 @@ export default function MyModal({ isOpen, setIsOpen }: MyModalProps) {
         user_name: "",
         password: "",
         description: "",
+        _id: "",
       });
       setIsOpen(false);
       userIdRefetch();
@@ -104,8 +116,13 @@ export default function MyModal({ isOpen, setIsOpen }: MyModalProps) {
 
   // when user click on the register/login button
   function handleAuthentication() {
-    if (authenticationInformation.user_name.trim() === "" || authenticationInformation.password.trim() === "") {
-      return toast.error("Please fill in all the information!");
+    if (
+      authenticationInformation.user_name.trim() === "" ||
+      authenticationInformation.password.trim() === "" ||
+      authenticationInformation.description.trim() === "" ||
+      address === undefined
+    ) {
+      return toast.error("Please fill in all the information and connect your wallet!");
     }
 
     if (selectedRole === "freelancer") {

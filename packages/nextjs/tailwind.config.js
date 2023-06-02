@@ -6,7 +6,7 @@ module.exports = {
     "./utils/**/*.{js,ts,jsx,tsx}",
     "./node_modules/react-tailwindcss-datepicker/dist/index.esm.js",
   ],
-  plugins: [require("daisyui")],
+  plugins: [require("daisyui"), require("@tailwindcss/line-clamp")],
   darkTheme: "scaffoldEthDark",
   // DaisyUI theme colors
   daisyui: {

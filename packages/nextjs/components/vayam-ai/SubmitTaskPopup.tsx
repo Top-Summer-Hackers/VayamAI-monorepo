@@ -1,6 +1,7 @@
 import { Fragment, useState } from "react";
 import { submitNewTask } from "../../api/vayam-ai/tasks";
 import { Dialog, Transition } from "@headlessui/react";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
 import Datepicker from "react-tailwindcss-datepicker";
 import { DateValueType } from "react-tailwindcss-datepicker/dist/types";
@@ -12,6 +13,8 @@ interface MyModalProps {
 }
 
 export default function MyModal({ isOpen, setIsOpen }: MyModalProps) {
+  const queryClient = useQueryClient();
+
   const [taskInformation, setTaskInformation] = useState({
     title: "",
     start_time: "",
@@ -31,6 +34,7 @@ export default function MyModal({ isOpen, setIsOpen }: MyModalProps) {
   const submitNewTaskMutation = useMutation({
     mutationFn: submitNewTask,
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["allTasks"] });
       setTaskInformation({
         title: "",
         start_time: "",

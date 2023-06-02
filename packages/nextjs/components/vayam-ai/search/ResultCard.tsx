@@ -26,7 +26,7 @@ const ResultCard = ({ taskDetail }: ResultCardProps) => {
       {/* separation line */}
       <div className="my-5 w-full h-[1px] bg-primary"></div>
       {/* job description */}
-      <div className="line-clamp-3">{taskDetail.description}</div>
+      <div className="line-clamp-3 min-h-[50px]">{taskDetail.description}</div>
       {/* skill sets */}
       <div className="mt-3 grid grid-cols-3 gap-4">
         {taskDetail.skills.map((skill: string) => (
