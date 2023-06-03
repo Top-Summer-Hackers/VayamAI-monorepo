@@ -2,12 +2,14 @@ import React, { useContext, useState } from "react";
 import { useRouter } from "next/router";
 import { useQuery } from "@tanstack/react-query";
 import { IoMdAdd } from "react-icons/io";
+import { getAllDeals } from "~~/api/vayam-ai/deal";
 import { getAllProposals } from "~~/api/vayam-ai/proposal";
 import { getAllTasks } from "~~/api/vayam-ai/tasks";
-import { Loading, SubmitProposalPopUp } from "~~/components/vayam-ai";
+import { CreateDealPopUp, Loading, SubmitProposalPopUp } from "~~/components/vayam-ai";
 import SomethingWentWrong from "~~/components/vayam-ai/SomethingWentWrong";
-import { JobProposal } from "~~/components/vayam-ai/job";
+import { JobOngoingDeal, JobProposal } from "~~/components/vayam-ai/job";
 import VayamAIContext from "~~/context/context";
+import { Deal } from "~~/types/vayam-ai/Deals";
 import { ProposalItem } from "~~/types/vayam-ai/Proposal";
 import { TaskItem } from "~~/types/vayam-ai/Task";
 
@@ -31,8 +33,20 @@ const JobDetail = () => {
     title: "",
   });
   const [proposals, setProposals] = useState<ProposalItem[]>([]);
+  const [deals, setDeals] = useState<Deal[]>([]);
+  const [currentDeal, setCurrentDeal] = useState<Deal>({
+    address: "",
+    client_id: "",
+    freelancer_id: "",
+    id: "",
+    price: 0,
+    proposal_id: "",
+    status: "",
+    task_id: "",
+  });
   const [selectedProposal, setSelectedProposal] = useState(0);
   const [isHadAcceptedProposal, setIsHadAcceptedProposal] = useState(false);
+  const [isCreateDealPopUp, setIsCreateDealPopUp] = useState(false);
 
   /*************************************************************
    * Backend interaction
@@ -54,7 +68,16 @@ const JobDetail = () => {
       const isAccepted = proposals.find((proposal: ProposalItem) => proposal.accepted == true);
       setProposals(proposals);
       setIsHadAcceptedProposal(isAccepted);
-      console.log(proposals);
+      // console.log(proposals);
+    },
+  });
+  const allDealsQuery = useQuery({
+    queryKey: ["allDeals", id],
+    queryFn: () => getAllDeals(),
+    onSuccess: data => {
+      const deals = data.deals.filter((deal: Deal) => deal.task_id == id);
+      setDeals(deals);
+      console.log(data);
     },
   });
 
@@ -63,17 +86,24 @@ const JobDetail = () => {
    ************************************************************/
 
   return (
-    <div>
-      {allTasksQuery.isLoading || allProposalsQuery.isLoading ? (
+    <div className="pb-10">
+      <CreateDealPopUp
+        dealId={currentDeal?.id}
+        proposal={proposals.find(proposal => proposal.id == currentDeal.proposal_id)}
+        clientAddr={currentDeal.client_id}
+        isOpen={isCreateDealPopUp}
+        setIsOpen={setIsCreateDealPopUp}
+      />
+      {allTasksQuery.isLoading || allProposalsQuery.isLoading || allDealsQuery.isLoading ? (
         <div className="w-fit mx-auto mt-10">
           <Loading />
         </div>
-      ) : allTasksQuery.isError || allProposalsQuery.isError ? (
+      ) : allTasksQuery.isError || allProposalsQuery.isError || allDealsQuery.isError ? (
         <SomethingWentWrong />
       ) : (
         <div className="px-5">
           <SubmitProposalPopUp
-            clientId={taskDetail.client_id}
+            clientId={taskDetail?.client_id}
             id={String(id)}
             isOpen={isSubmitProposalOpen}
             setIsOpen={setIsSubmitProposalOpen}
@@ -129,21 +159,33 @@ const JobDetail = () => {
               </div>
             </div>
             <div>
-              <h3 className="text-xl font-semibold">Submitted Proposal</h3>
-              <div className="flex flex-col gap-2">
-                {proposals.map((proposal, index) => (
-                  <div key={proposal.id} onClick={() => setSelectedProposal(index)}>
-                    <JobProposal
-                      proposal={proposal}
-                      id={proposal.id}
-                      isAcceptedAlready={isHadAcceptedProposal}
-                      freelancerAddr={proposal.freelancer_id}
-                      clientAddr={proposal.client_id}
-                      accepted={proposal.accepted}
-                      price={proposal.price}
-                    />
-                  </div>
-                ))}
+              <div>
+                <h3 className="text-xl font-semibold">Submitted Proposal</h3>
+                <div className="flex flex-col gap-2">
+                  {proposals.map((proposal, index) => (
+                    <div key={proposal.id} onClick={() => setSelectedProposal(index)}>
+                      <JobProposal
+                        proposal={proposal}
+                        id={proposal.id}
+                        isAcceptedAlready={isHadAcceptedProposal}
+                        freelancerAddr={proposal.freelancer_id}
+                        clientAddr={proposal.client_id}
+                        accepted={proposal.accepted}
+                        price={proposal.price}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="mt-5">
+                <h3 className="text-xl font-semibold">Ongoing Deal</h3>
+                <div className="flex flex-col gap-2">
+                  {deals.map(deal => (
+                    <div key={deal.id} onClick={() => setCurrentDeal(deal)}>
+                      <JobOngoingDeal deal={deal} setIsCreateDealPopUp={setIsCreateDealPopUp} />
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>

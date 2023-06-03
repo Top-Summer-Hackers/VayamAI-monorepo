@@ -55,7 +55,7 @@ export default function MyModal({ clientId, isOpen, setIsOpen, id }: MyModalProp
         price: 0,
       });
       setIsOpen(false);
-      queryClient.invalidateQueries({ queryKey: ["jobProposal", id] });
+      queryClient.invalidateQueries({ queryKey: ["jobProposal"] });
     },
     onError: (error: any) => {
       toast.error(error.response.data.message);
@@ -98,8 +98,10 @@ export default function MyModal({ clientId, isOpen, setIsOpen, id }: MyModalProp
     console.log(currentMilestone);
     if (
       currentMilestone.deadline.trim() === "" ||
-      currentMilestone.description.trim() === "" ||
-      currentMilestone.price <= 0
+      currentMilestone.description.trim() === ""
+
+      // ||
+      // currentMilestone.price <= 0
     ) {
       toast.error("Please provide valid a milestone!");
       return false;

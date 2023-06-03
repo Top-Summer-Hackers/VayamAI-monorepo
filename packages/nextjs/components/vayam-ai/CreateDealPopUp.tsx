@@ -1,8 +1,10 @@
 import { Fragment, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
+import { useMutation } from "@tanstack/react-query";
 import { BigNumber } from "ethers";
 import keccak256 from "keccak256";
 import { toast } from "react-hot-toast";
+import { updateDeal } from "~~/api/vayam-ai/deal";
 import { useDeployedContractInfo, useScaffoldContractWrite, useScaffoldEventSubscriber } from "~~/hooks/scaffold-eth";
 import { ProposalItem } from "~~/types/vayam-ai/Proposal";
 
@@ -10,10 +12,11 @@ interface MyModalProps {
   isOpen: boolean;
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
   clientAddr: string;
-  proposal: ProposalItem;
+  proposal: ProposalItem | undefined;
+  dealId: string;
 }
 
-export default function MyModal({ proposal, clientAddr, isOpen, setIsOpen }: MyModalProps) {
+export default function MyModal({ dealId, proposal, clientAddr, isOpen, setIsOpen }: MyModalProps) {
   const [selectedCurrency, setSelectedCurrency] = useState("usdc");
   const [duration, setDuration] = useState(0);
 
@@ -29,6 +32,10 @@ export default function MyModal({ proposal, clientAddr, isOpen, setIsOpen }: MyM
     listener: (index, address, amounts, type, version) => {
       console.log(amounts, type, version);
       console.log(index, address);
+      updateInvoiceAddrMutation.mutate({
+        dealId: dealId,
+        invoiceAddr: address,
+      });
     },
   });
 
@@ -40,7 +47,7 @@ export default function MyModal({ proposal, clientAddr, isOpen, setIsOpen }: MyM
       selectedCurrency == "usdc" ? USDCContract?.address : DAIContract?.address,
       (duration * 24 * 60 * 60) as unknown as BigNumber,
       ("0x" + keccak256(``).toString("hex")) as `0x${string}`,
-      proposal.milestones.map(milestone => milestone.price as unknown as BigNumber),
+      proposal?.milestones.map(milestone => milestone.price as unknown as BigNumber),
     ] as readonly [
       string | undefined,
       string | undefined,
@@ -53,6 +60,19 @@ export default function MyModal({ proposal, clientAddr, isOpen, setIsOpen }: MyM
       const result = await data.wait();
       console.log(result);
       setIsOpen(false);
+    },
+  });
+
+  /*************************************************************
+   * Backend interaction
+   ************************************************************/
+  const updateInvoiceAddrMutation = useMutation({
+    mutationFn: updateDeal,
+    onSuccess: () => {
+      toast.success("Updated Deal!");
+    },
+    onError: (error: any) => {
+      toast.error(error.response.data.message);
     },
   });
 
@@ -163,7 +183,7 @@ export default function MyModal({ proposal, clientAddr, isOpen, setIsOpen }: MyM
                         Amount
                       </label>
                       <div className="font-semibold w-full rounded-lg border border-primary outline-none bg-transparent text-base px-4 py-2">
-                        {proposal.milestones.map((milestone, index) => (
+                        {proposal?.milestones.map((milestone, index) => (
                           <div key={milestone.description + index} className="flex items-center gap-2">
                             <div>{index + 1}.</div>
                             <div>

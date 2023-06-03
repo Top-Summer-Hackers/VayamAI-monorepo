@@ -1,9 +1,8 @@
-import React, { useContext, useState } from "react";
-import { CreateDealPopUp } from "..";
+import React, { useContext } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
 import truncateEthAddress from "truncate-eth-address";
-import { useAccount, useQueryClient } from "wagmi";
+import { useQueryClient } from "wagmi";
 import { approveProposal } from "~~/api/vayam-ai/proposal";
 import VayamAIContext from "~~/context/context";
 import { ProposalItem } from "~~/types/vayam-ai/Proposal";
@@ -18,20 +17,9 @@ interface JobProposalProps {
   proposal: ProposalItem;
 }
 
-const JobProposal = ({
-  proposal,
-  id,
-  isAcceptedAlready,
-  accepted,
-  freelancerAddr,
-  clientAddr,
-  price,
-}: JobProposalProps) => {
+const JobProposal = ({ id, isAcceptedAlready, accepted, freelancerAddr, price }: JobProposalProps) => {
   const queryClient = useQueryClient();
-  const { address } = useAccount();
   const { userType, clientKeccak256 } = useContext(VayamAIContext);
-
-  const [isCreateDealPopUp, setIsCreateDealPopUp] = useState(false);
 
   /*************************************************************
    * Backend interaction
@@ -56,12 +44,6 @@ const JobProposal = ({
 
   return (
     <div className="grid grid-cols-3 cursor-pointer">
-      <CreateDealPopUp
-        proposal={proposal}
-        clientAddr={clientAddr}
-        isOpen={isCreateDealPopUp}
-        setIsOpen={setIsCreateDealPopUp}
-      />
       <div className="flex items-center justify-start gap-2">
         <div>
           <img src="/job_detail/avatar.png" alt="avatar" className="w-12 h-12" />
@@ -82,13 +64,6 @@ const JobProposal = ({
             {approveProposalMutation.isLoading ? "Loading" : accepted ? "Accepted" : "Accept"}
           </button>
         )
-      ) : freelancerAddr == address && accepted == true ? (
-        <div
-          onClick={() => setIsCreateDealPopUp(true)}
-          className="flex flex-col justify-center w-fit rounded-full px-5 h-fit font-semibold py-2 connect-bg"
-        >
-          Create Deal
-        </div>
       ) : (
         <div className="flex flex-col justify-center w-full h-full ">{accepted ? "Accepted" : "Not Accepted Yet"}</div>
       )}
@@ -97,3 +72,12 @@ const JobProposal = ({
 };
 
 export default JobProposal;
+
+// freelancerAddr == address && accepted == true ? (
+// <div
+//   onClick={() => setIsCreateDealPopUp(true)}
+//   className="flex flex-col justify-center w-fit rounded-full px-5 h-fit font-semibold py-2 connect-bg"
+// >
+//   Create Deal
+// </div>
+// ) :
