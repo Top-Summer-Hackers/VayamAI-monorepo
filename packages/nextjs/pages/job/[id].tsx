@@ -1,9 +1,15 @@
 import React, { useContext, useState } from "react";
 import { useRouter } from "next/router";
+import { useQuery } from "@tanstack/react-query";
 import { IoMdAdd } from "react-icons/io";
-import { SubmitProposalPopUp } from "~~/components/vayam-ai";
+import { getAllProposals } from "~~/api/vayam-ai/proposal";
+import { getAllTasks } from "~~/api/vayam-ai/tasks";
+import { Loading, SubmitProposalPopUp } from "~~/components/vayam-ai";
+import SomethingWentWrong from "~~/components/vayam-ai/SomethingWentWrong";
 import { JobProposal } from "~~/components/vayam-ai/job";
 import VayamAIContext from "~~/context/context";
+import { ProposalItem } from "~~/types/vayam-ai/Proposal";
+import { TaskItem } from "~~/types/vayam-ai/Task";
 
 const JobDetail = () => {
   const router = useRouter();
@@ -11,69 +17,138 @@ const JobDetail = () => {
   const { userType, freelancerKeccak256 } = useContext(VayamAIContext);
 
   const { id } = router.query;
-  console.log(id);
 
   const [isSubmitProposalOpen, setIsSubmitProposalOpen] = useState(false);
+  const [taskDetail, setTaskDetail] = useState<TaskItem>({
+    bounty: 0,
+    client_id: "",
+    deadline: "",
+    description: "",
+    id: "",
+    proposals_id: [],
+    skills: [],
+    start_time: "",
+    title: "",
+  });
+  const [proposals, setProposals] = useState<ProposalItem[]>([]);
+  const [selectedProposal, setSelectedProposal] = useState(0);
+  const [isHadAcceptedProposal, setIsHadAcceptedProposal] = useState(false);
+
+  /*************************************************************
+   * Backend interaction
+   ************************************************************/
+  const allTasksQuery = useQuery({
+    queryKey: ["jobDetail", id],
+    queryFn: () => getAllTasks(),
+    onSuccess: data => {
+      const jobDetail = data.tasks.find((task: TaskItem) => task.id == id);
+      // console.log(jobDetail);
+      setTaskDetail(jobDetail);
+    },
+  });
+  const allProposalsQuery = useQuery({
+    queryKey: ["jobProposal", id],
+    queryFn: () => getAllProposals(),
+    onSuccess: data => {
+      const proposals = data.proposals.filter((proposal: ProposalItem) => proposal.task_id == id);
+      const isAccepted = proposals.find((proposal: ProposalItem) => proposal.accepted == true);
+      setProposals(proposals);
+      setIsHadAcceptedProposal(isAccepted);
+      console.log(proposals);
+    },
+  });
+
+  /*************************************************************
+   * Component functions
+   ************************************************************/
 
   return (
-    <div className="px-5">
-      <SubmitProposalPopUp id={String(id)} isOpen={isSubmitProposalOpen} setIsOpen={setIsSubmitProposalOpen} />
-      {/* job title */}
-      <div className="flex items-center justify-between mt-5">
-        <div className="text-3xl font-bold mt-5">Developer XXX - Job Title</div>
-        {userType != undefined && userType == freelancerKeccak256 && (
-          <div
-            onClick={() => setIsSubmitProposalOpen(true)}
-            className="cursor-pointer flex-center gap-1 border border-primary rounded-full px-5 py-2"
-          >
-            Submit Proposal <IoMdAdd />
-          </div>
-        )}
-      </div>
-      {/* time range + job description */}
-      <div className="mt-5 font-semibold text-lg">
-        <div>Time range - time range</div>
-        <div className="mt-1">
-          Full job description here.Full job description here.Full job description here.Full job description here.Full
-          job description here.Full job description here.
+    <div>
+      {allTasksQuery.isLoading || allProposalsQuery.isLoading ? (
+        <div className="w-fit mx-auto mt-10">
+          <Loading />
         </div>
-      </div>
-      {/* skills */}
-      <div className="mt-5 w-full">
-        <div className="flex justify-between items-start">
-          <div className="max-w-[70%] flex flex-wrap gap-3">
-            <div className="rounded border-2 border-white bg-[#2C2734] w-fit px-10 py-0.5">Skill</div>
-            <div className="rounded border-2 border-white bg-[#2C2734] w-fit px-10 py-0.5">Skill</div>
-            <div className="rounded border-2 border-white bg-[#2C2734] w-fit px-10 py-0.5">Skill</div>
-            <div className="rounded border-2 border-white bg-[#2C2734] w-fit px-10 py-0.5">Skill</div>{" "}
-            <div className="rounded border-2 border-white bg-[#2C2734] w-fit px-10 py-0.5">Skill</div>{" "}
-            <div className="rounded border-2 border-white bg-[#2C2734] w-fit px-10 py-0.5">Skill</div>{" "}
-            <div className="rounded border-2 border-white bg-[#2C2734] w-fit px-10 py-0.5">Skill</div>{" "}
-            <div className="rounded border-2 border-white bg-[#2C2734] w-fit px-10 py-0.5">Skill</div>
+      ) : allTasksQuery.isError || allProposalsQuery.isError ? (
+        <SomethingWentWrong />
+      ) : (
+        <div className="px-5">
+          <SubmitProposalPopUp
+            clientId={taskDetail.client_id}
+            id={String(id)}
+            isOpen={isSubmitProposalOpen}
+            setIsOpen={setIsSubmitProposalOpen}
+          />
+          {/* job title */}
+          <div className="flex items-center justify-between mt-5">
+            <div className="text-3xl font-bold mt-5">{taskDetail.title}</div>
+            {userType != undefined && userType == freelancerKeccak256 && (
+              <div
+                onClick={() => setIsSubmitProposalOpen(true)}
+                className="cursor-pointer flex-center gap-1 border border-primary rounded-full px-5 py-2"
+              >
+                Submit Proposal <IoMdAdd />
+              </div>
+            )}
           </div>
-          <div>Bounty range ?? - ??</div>
-        </div>
-      </div>
-      {/* milestones list + proposal list */}
-      <div className="mt-10 grid grid-cols-1 lg:grid-cols-2 gap-5">
-        <div>
-          <h3 className="text-xl font-semibold">Milestone List</h3>
-          <div>
-            <div>Description 1 $??</div>
-            <div>Description 1 $??</div>
-            <div>Description 1 $??</div>
-            <div>Description 1 $??</div>
+          {/* time range + job description */}
+          <div className="mt-5 font-semibold text-lg">
+            <div>
+              {taskDetail.start_time} - {taskDetail.deadline}
+            </div>
+            <div className="mt-1">{taskDetail.description}</div>
+          </div>
+          {/* skills */}
+          <div className="mt-5 w-full">
+            <div className="flex justify-between items-start">
+              <div className="max-w-[70%] flex flex-wrap gap-3">
+                {taskDetail.skills.map((skill, index) => (
+                  <div key={skill + index} className="rounded border-2 border-white bg-[#2C2734] w-fit px-10 py-0.5">
+                    {skill}
+                  </div>
+                ))}
+              </div>
+              <div>Bounty: {taskDetail.bounty}</div>
+            </div>
+          </div>
+          {/* milestones list + proposal list */}
+          <div className="mt-10 grid grid-cols-1 lg:grid-cols-2 gap-5">
+            <div>
+              <h3 className="text-xl font-semibold">Milestone List</h3>
+              <div className="flex flex-col gap-3">
+                {proposals[selectedProposal]?.milestones.map((milestone, index) => (
+                  <div key={milestone.description + index} className="border-l-2 pl-3 border-sideColor">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <div className="font-semibold">{milestone.description}</div>
+                        <div>Deadline: {milestone.deadline}</div>
+                        <div>Price: {milestone.price}</div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h3 className="text-xl font-semibold">Submitted Proposal</h3>
+              <div className="flex flex-col gap-2">
+                {proposals.map((proposal, index) => (
+                  <div key={proposal.id} onClick={() => setSelectedProposal(index)}>
+                    <JobProposal
+                      proposal={proposal}
+                      id={proposal.id}
+                      isAcceptedAlready={isHadAcceptedProposal}
+                      freelancerAddr={proposal.freelancer_id}
+                      clientAddr={proposal.client_id}
+                      accepted={proposal.accepted}
+                      price={proposal.price}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
-        <div>
-          <h3 className="text-xl font-semibold">Submitted Proposal</h3>
-          <div className="flex flex-col gap-2">
-            <JobProposal />
-            <JobProposal />
-            <JobProposal />
-          </div>
-        </div>
-      </div>
+      )}
     </div>
   );
 };

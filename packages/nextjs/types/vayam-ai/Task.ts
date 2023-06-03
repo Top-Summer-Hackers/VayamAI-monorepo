@@ -17,3 +17,15 @@ export type TaskList = {
   start_time: string;
   title: string;
 };
+
+export type TaskItem = {
+  bounty: number;
+  client_id: string;
+  deadline: string;
+  description: string;
+  id: string;
+  proposals_id: string[];
+  skills: string[];
+  start_time: string;
+  title: string;
+};

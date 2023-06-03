@@ -5,7 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
 import Datepicker from "react-tailwindcss-datepicker";
 import { DateValueType } from "react-tailwindcss-datepicker/dist/types";
-import { useMutation } from "wagmi";
+import { useAccount, useMutation } from "wagmi";
 
 interface MyModalProps {
   isOpen: boolean;
@@ -14,6 +14,7 @@ interface MyModalProps {
 
 export default function MyModal({ isOpen, setIsOpen }: MyModalProps) {
   const queryClient = useQueryClient();
+  const { address } = useAccount();
 
   const [taskInformation, setTaskInformation] = useState({
     title: "",
@@ -96,6 +97,7 @@ export default function MyModal({ isOpen, setIsOpen }: MyModalProps) {
           description: taskInformation.description,
           skills: taskInformation.skills.split(","),
           bounty: taskInformation.bounty & 0xffff, //u16
+          client_id: address,
         };
         submitNewTaskMutation.mutate({ taskInfo: submitData });
         console.log(submitData);

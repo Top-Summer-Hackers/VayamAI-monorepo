@@ -1,3 +1,4 @@
+import CreateDealPopUp from "./CreateDealPopUp";
 import Layout from "./Layout";
 import Loading from "./Loading";
 import Navbar from "./Navbar";
@@ -8,6 +9,7 @@ import SubmitProposalPopUp from "./SubmitProposalPopUp";
 import SubmitTaskPopup from "./SubmitTaskPopup";
 
 export {
+  CreateDealPopUp,
   Layout,
   Loading,
   Navbar,

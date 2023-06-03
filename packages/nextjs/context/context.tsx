@@ -52,7 +52,7 @@ export const VayamAIContextProvider = ({ children }: PropsWithChildren) => {
     args: [address === undefined ? undefined : address] as readonly [string | undefined],
   });
 
-  console.log(userType);
+  // console.log(userType);
 
   useEffect(() => {
     userIdRefetch();

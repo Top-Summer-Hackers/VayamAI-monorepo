@@ -4,7 +4,7 @@ import { Dialog, Transition } from "@headlessui/react";
 import { toast } from "react-hot-toast";
 import Datepicker from "react-tailwindcss-datepicker";
 import { DateValueType } from "react-tailwindcss-datepicker/dist/types";
-import { useAccount, useMutation } from "wagmi";
+import { useAccount, useMutation, useQueryClient } from "wagmi";
 import { submitProposal } from "~~/api/vayam-ai/milestone";
 import { formatDate } from "~~/utils/vayam-ai/convertDate";
 
@@ -18,9 +18,12 @@ interface MyModalProps {
   isOpen: boolean;
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
   id: string;
+  clientId: string;
 }
 
-export default function MyModal({ isOpen, setIsOpen, id }: MyModalProps) {
+export default function MyModal({ clientId, isOpen, setIsOpen, id }: MyModalProps) {
+  const queryClient = useQueryClient();
+
   const { address } = useAccount();
 
   const [dateTimeForJob, setDateTimeForJob] = useState<DateValueType>({
@@ -52,6 +55,7 @@ export default function MyModal({ isOpen, setIsOpen, id }: MyModalProps) {
         price: 0,
       });
       setIsOpen(false);
+      queryClient.invalidateQueries({ queryKey: ["jobProposal", id] });
     },
     onError: (error: any) => {
       toast.error(error.response.data.message);
@@ -128,6 +132,7 @@ export default function MyModal({ isOpen, setIsOpen, id }: MyModalProps) {
       });
       submitProposalMutation.mutate({
         proposal: {
+          client_id: clientId,
           task_id: id,
           freelancer_id: address!,
           milestones: allMilestone,

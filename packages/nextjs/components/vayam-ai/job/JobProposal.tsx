@@ -1,15 +1,97 @@
-import React from "react";
+import React, { useContext, useState } from "react";
+import { CreateDealPopUp } from "..";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "react-hot-toast";
+import truncateEthAddress from "truncate-eth-address";
+import { useAccount, useQueryClient } from "wagmi";
+import { approveProposal } from "~~/api/vayam-ai/proposal";
+import VayamAIContext from "~~/context/context";
+import { ProposalItem } from "~~/types/vayam-ai/Proposal";
 
-const JobProposal = () => {
+interface JobProposalProps {
+  id: string;
+  freelancerAddr: string;
+  clientAddr: string;
+  accepted: boolean;
+  price: number;
+  isAcceptedAlready: boolean;
+  proposal: ProposalItem;
+}
+
+const JobProposal = ({
+  proposal,
+  id,
+  isAcceptedAlready,
+  accepted,
+  freelancerAddr,
+  clientAddr,
+  price,
+}: JobProposalProps) => {
+  const queryClient = useQueryClient();
+  const { address } = useAccount();
+  const { userType, clientKeccak256 } = useContext(VayamAIContext);
+
+  const [isCreateDealPopUp, setIsCreateDealPopUp] = useState(false);
+
+  /*************************************************************
+   * Backend interaction
+   ************************************************************/
+  const approveProposalMutation = useMutation({
+    mutationFn: approveProposal,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["jobProposal"] });
+      toast.success("Approved proposal!");
+    },
+    onError: (error: any) => {
+      toast.error(error.response.data.message);
+    },
+  });
+
+  /*************************************************************
+   * Component functions
+   ************************************************************/
+  function handleAcceptProposal() {
+    approveProposalMutation.mutate(id);
+  }
+
   return (
-    <div className="grid grid-cols-2">
+    <div className="grid grid-cols-3 cursor-pointer">
+      <CreateDealPopUp
+        proposal={proposal}
+        clientAddr={clientAddr}
+        isOpen={isCreateDealPopUp}
+        setIsOpen={setIsCreateDealPopUp}
+      />
       <div className="flex items-center justify-start gap-2">
         <div>
           <img src="/job_detail/avatar.png" alt="avatar" className="w-12 h-12" />
         </div>
-        <div>Milestone Proposal</div>
+        <div>{truncateEthAddress(freelancerAddr)}</div>
       </div>
-      <div className="flex flex-col justify-center w-full h-full">Time</div>
+      <div className="flex flex-col justify-center w-full h-full ">${price}</div>
+      {userType == clientKeccak256 ? (
+        isAcceptedAlready ? (
+          <button className="cursor-not-allowed flex flex-col justify-center w-fit rounded-full px-5 h-fit font-semibold py-2 border border-primary">
+            {accepted ? "Accepted" : "Accept"}
+          </button>
+        ) : (
+          <button
+            onClick={handleAcceptProposal}
+            className="flex flex-col justify-center w-fit rounded-full px-5 h-fit font-semibold py-2 connect-bg"
+          >
+            {approveProposalMutation.isLoading ? "Loading" : accepted ? "Accepted" : "Accept"}
+          </button>
+        )
+      ) : freelancerAddr == address && accepted == true ? (
+        <div
+          onClick={() => setIsCreateDealPopUp(true)}
+          className="flex flex-col justify-center w-fit rounded-full px-5 h-fit font-semibold py-2 connect-bg"
+        >
+          Create Deal
+        </div>
+      ) : (
+        <div className="flex flex-col justify-center w-full h-full ">{accepted ? "Accepted" : "Not Accepted Yet"}</div>
+      )}
     </div>
   );
 };

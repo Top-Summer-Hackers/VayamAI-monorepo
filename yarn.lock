@@ -1859,6 +1859,7 @@ __metadata:
     react-icons: ^4.9.0
     react-tailwindcss-datepicker: ^1.6.1
     tailwindcss: ^3.1.8
+    truncate-eth-address: ^1.0.2
     typescript: ^4.9.5
     use-debounce: ^8.0.4
     usehooks-ts: ^2.7.2
@@ -12860,6 +12861,13 @@ __metadata:
   version: 0.0.3
   resolution: "tr46@npm:0.0.3"
   checksum: 726321c5eaf41b5002e17ffbd1fb7245999a073e8979085dacd47c4b4e8068ff5777142fc6726d6ca1fd2ff16921b48788b87225cbc57c72636f6efa8efbffe3
+  languageName: node
+  linkType: hard
+
+"truncate-eth-address@npm:^1.0.2":
+  version: 1.0.2
+  resolution: "truncate-eth-address@npm:1.0.2"
+  checksum: c56406753f5071e008ef67269e86f6b5c598e9a673930715b6175ad5a2708a4b39a32571ccc49b1dbd143e774a19a0a38b0bf2a5ae6e857560eae8c84140e95b
   languageName: node
   linkType: hard
 
