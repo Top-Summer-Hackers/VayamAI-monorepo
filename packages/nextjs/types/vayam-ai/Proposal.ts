@@ -5,10 +5,13 @@ export type Milestone = {
 };
 
 export type Proposal = {
+  accepted?: boolean;
   client_id: string;
   task_id: string;
   freelancer_id: string;
   milestones: Milestone[];
+  price?: number;
+  id?: string;
 };
 
 export type MilestoneItem = {
