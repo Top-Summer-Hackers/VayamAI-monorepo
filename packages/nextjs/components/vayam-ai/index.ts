@@ -1,3 +1,4 @@
+import ApprovePopUp from "./ApprovePopUp";
 import CreateDealPopUp from "./CreateDealPopUp";
 import Layout from "./Layout";
 import Loading from "./Loading";
@@ -18,4 +19,5 @@ export {
   RatingPopUp,
   SubmitTaskPopup,
   SubmitProposalPopUp,
+  ApprovePopUp,
 };

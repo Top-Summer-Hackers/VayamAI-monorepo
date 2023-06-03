@@ -110,7 +110,7 @@ const JobDetail = () => {
           />
           {/* job title */}
           <div className="flex items-center justify-between mt-5">
-            <div className="text-3xl font-bold mt-5">{taskDetail.title}</div>
+            <div className="text-3xl font-bold mt-5">{taskDetail?.title}</div>
             {userType != undefined && userType == freelancerKeccak256 && (
               <div
                 onClick={() => setIsSubmitProposalOpen(true)}
