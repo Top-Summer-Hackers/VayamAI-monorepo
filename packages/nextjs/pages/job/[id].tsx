@@ -103,6 +103,7 @@ const JobDetail = () => {
       ) : (
         <div className="px-5">
           <SubmitProposalPopUp
+            refetchProposals={allProposalsQuery.refetch}
             clientId={taskDetail?.client_id}
             id={String(id)}
             isOpen={isSubmitProposalOpen}
@@ -123,21 +124,21 @@ const JobDetail = () => {
           {/* time range + job description */}
           <div className="mt-5 font-semibold text-lg">
             <div>
-              {taskDetail.start_time} - {taskDetail.deadline}
+              {taskDetail?.start_time} - {taskDetail?.deadline}
             </div>
-            <div className="mt-1">{taskDetail.description}</div>
+            <div className="mt-1">{taskDetail?.description}</div>
           </div>
           {/* skills */}
           <div className="mt-5 w-full">
             <div className="flex justify-between items-start">
               <div className="max-w-[70%] flex flex-wrap gap-3">
-                {taskDetail.skills.map((skill, index) => (
+                {taskDetail?.skills.map((skill, index) => (
                   <div key={skill + index} className="rounded border-2 border-white bg-[#2C2734] w-fit px-10 py-0.5">
                     {skill}
                   </div>
                 ))}
               </div>
-              <div>Bounty: {taskDetail.bounty}</div>
+              <div>Bounty: {taskDetail?.bounty}</div>
             </div>
           </div>
           {/* milestones list + proposal list */}
@@ -165,6 +166,7 @@ const JobDetail = () => {
                   {proposals.map((proposal, index) => (
                     <div key={proposal.id} onClick={() => setSelectedProposal(index)}>
                       <JobProposal
+                        refetchProposals={allProposalsQuery.refetch}
                         proposal={proposal}
                         id={proposal.id}
                         isAcceptedAlready={isHadAcceptedProposal}

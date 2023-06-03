@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { QueryObserverResult, RefetchOptions, RefetchQueryFilters, useMutation } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
 import truncateEthAddress from "truncate-eth-address";
 import { useQueryClient } from "wagmi";
@@ -15,9 +15,19 @@ interface JobProposalProps {
   price: number;
   isAcceptedAlready: boolean;
   proposal: ProposalItem;
+  refetchProposals: <TPageData>(
+    options?: (RefetchOptions & RefetchQueryFilters<TPageData>) | undefined,
+  ) => Promise<QueryObserverResult<any, unknown>>;
 }
 
-const JobProposal = ({ id, isAcceptedAlready, accepted, freelancerAddr, price }: JobProposalProps) => {
+const JobProposal = ({
+  id,
+  refetchProposals,
+  isAcceptedAlready,
+  accepted,
+  freelancerAddr,
+  price,
+}: JobProposalProps) => {
   const queryClient = useQueryClient();
   const { userType, clientKeccak256 } = useContext(VayamAIContext);
 
@@ -29,6 +39,7 @@ const JobProposal = ({ id, isAcceptedAlready, accepted, freelancerAddr, price }:
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["jobProposal"] });
       toast.success("Approved proposal!");
+      refetchProposals();
     },
     onError: (error: any) => {
       toast.error(error.response.data.message);

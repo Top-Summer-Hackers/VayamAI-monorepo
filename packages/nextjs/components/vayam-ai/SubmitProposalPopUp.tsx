@@ -1,10 +1,11 @@
 import { Fragment, useState } from "react";
 import Loading from "./Loading";
 import { Dialog, Transition } from "@headlessui/react";
+import { QueryObserverResult, RefetchOptions, RefetchQueryFilters } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
 import Datepicker from "react-tailwindcss-datepicker";
 import { DateValueType } from "react-tailwindcss-datepicker/dist/types";
-import { useAccount, useMutation, useQueryClient } from "wagmi";
+import { useAccount, useMutation } from "wagmi";
 import { submitProposal } from "~~/api/vayam-ai/milestone";
 import { formatDate } from "~~/utils/vayam-ai/convertDate";
 
@@ -19,11 +20,12 @@ interface MyModalProps {
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
   id: string;
   clientId: string;
+  refetchProposals: <TPageData>(
+    options?: (RefetchOptions & RefetchQueryFilters<TPageData>) | undefined,
+  ) => Promise<QueryObserverResult<any, unknown>>;
 }
 
-export default function MyModal({ clientId, isOpen, setIsOpen, id }: MyModalProps) {
-  const queryClient = useQueryClient();
-
+export default function MyModal({ refetchProposals, clientId, isOpen, setIsOpen, id }: MyModalProps) {
   const { address } = useAccount();
 
   const [dateTimeForJob, setDateTimeForJob] = useState<DateValueType>({
@@ -55,7 +57,7 @@ export default function MyModal({ clientId, isOpen, setIsOpen, id }: MyModalProp
         price: 0,
       });
       setIsOpen(false);
-      queryClient.invalidateQueries({ queryKey: ["jobProposal"] });
+      refetchProposals();
     },
     onError: (error: any) => {
       toast.error(error.response.data.message);
