@@ -1,7 +1,31 @@
 import React from "react";
-import { TaskList } from "~~/components/vayam-ai/provider";
+
+// import { useQuery } from "@tanstack/react-query";
+// import { useAccount } from "wagmi";
+
+// import { getAllProposals } from "~~/api/vayam-ai/proposal";
+// import { TaskList } from "~~/components/vayam-ai/provider";
+// import { Proposal } from "~~/types/vayam-ai/Proposal";
 
 const ProviderDashboard = () => {
+  // const { address } = useAccount();
+
+  /*************************************************************
+   * Backend interaction
+   ************************************************************/
+  // const allTasksQuery = useQuery({
+  //   queryKey: ["providerProposal", address],
+  //   queryFn: () => getAllProposals(),
+  //   onSuccess: data => {
+  //     const proposals = data.proposals.filter((proposal: Proposal) => proposal.freelancer_id == address);
+  //     // setClientTasks(jobs);
+  //     // if (jobs.length > 0) {
+  //     //   setCurrentTask(jobs[0]);
+  //     // }
+  //     console.log(proposals);
+  //   },
+  // });
+
   return (
     <div className="px-5">
       {/* job title */}
@@ -9,9 +33,9 @@ const ProviderDashboard = () => {
       <div className="relative mt-5 w-full grid grid-cols-1 lg:grid-cols-2 gap-10">
         {/* list of tasks */}
         <div className="lg:after:absolute lg:after:left-[50%] lg:after:-translate-x-[50%] lg:after:content-[''] lg:after:h-full lg:after:w-[2px] lg:after:bg-white flex flex-col gap-8">
+          {/* <TaskList />
           <TaskList />
-          <TaskList />
-          <TaskList />
+          <TaskList /> */}
         </div>
         {/* preview */}
         <div>
