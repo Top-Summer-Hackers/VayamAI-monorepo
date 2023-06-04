@@ -31,7 +31,12 @@ const Navbar = () => {
       <SubmitTaskPopup isOpen={isSubmitTaskOpen} setIsOpen={setIsSubmitTaskOpen} />
       {/* logo/app name */}
       <Link href={"/"}>
-        <div className="text-xl md:text-2xl lg:text-3xl font-bold">VayamAi</div>
+        <div className="flex items-center">
+          <div>
+            <img src="/logo.png" alt="" className="w-12" />
+          </div>
+          <h1 className="text-xl md:text-2xl lg:text-3xl font-bold">VayamAi</h1>
+        </div>
       </Link>
       {/* searchbar */}
       <div>
