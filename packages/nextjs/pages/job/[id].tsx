@@ -56,7 +56,7 @@ const JobDetail = () => {
     queryFn: () => getAllTasks(),
     onSuccess: data => {
       const jobDetail = data.tasks.find((task: TaskItem) => task.id == id);
-      // console.log(jobDetail);
+      console.log(jobDetail);
       setTaskDetail(jobDetail);
     },
   });
