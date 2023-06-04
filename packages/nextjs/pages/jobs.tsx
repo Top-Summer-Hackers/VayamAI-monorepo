@@ -16,7 +16,7 @@ const Jobs = () => {
   console.log(allTasksQuery.data);
 
   return (
-    <div>
+    <div className="pb-20">
       <div className="text-3xl font-bold mt-5">Jobs List</div>
       {/* result */}
       {allTasksQuery.isLoading ? (

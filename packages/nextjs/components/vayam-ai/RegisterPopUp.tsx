@@ -78,6 +78,12 @@ export default function MyModal({ isOpen, setIsOpen }: MyModalProps) {
       toast.success("Registered as Freelancer!");
     },
     onError: (error: any) => {
+      setAuthenticationInformation({
+        user_name: "",
+        password: "",
+        description: "",
+        _id: "",
+      });
       toast.error(error.response.data.message);
     },
   });

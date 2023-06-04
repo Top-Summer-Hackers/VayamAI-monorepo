@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ApprovePopUp } from "..";
+import { ApprovePopUp, RatingPopUp } from "..";
 import { toast } from "react-hot-toast";
 import truncateEthAddress from "truncate-eth-address";
 import { useAccount } from "wagmi";
@@ -15,6 +15,7 @@ const JobOngoingDeal = ({ deal, setIsCreateDealPopUp }: JobOngoingDealProps) => 
   const { address } = useAccount();
 
   const [isApproveOpen, setIsApproveOpen] = useState(false);
+  const [isRatingOpen, setIsRatingOpen] = useState(false);
   const [isApproved, setIsApproved] = useState(false);
 
   /*************************************************************
@@ -47,8 +48,13 @@ const JobOngoingDeal = ({ deal, setIsCreateDealPopUp }: JobOngoingDealProps) => 
     }
   }
 
+  function handleCloseDeal() {
+    setIsRatingOpen(true);
+  }
+
   return (
     <div className="w-full grid grid-cols-3">
+      <RatingPopUp invoiceAddress={deal.address} isOpen={isRatingOpen} setIsOpen={setIsRatingOpen} />
       <ApprovePopUp
         setIsApproved={setIsApproved}
         amount={deal?.price ?? ""}
@@ -89,13 +95,35 @@ const JobOngoingDeal = ({ deal, setIsCreateDealPopUp }: JobOngoingDealProps) => 
           </div>
         ) : null}
         {deal.freelancer_id == address && deal.address != "0x0" && invoice?.isAcknowledged == true ? (
-          <div className="text-green-300 text-sm mt-1 flex flex-col justify-center w-fit rounded-full px-5 h-fit font-semibold py-1">
-            Deal Ongoing
+          <div
+            onClick={handleCloseDeal}
+            className="text-green cursor-pointer text-sm mt-1 flex flex-col justify-center w-fit rounded-full px-5 h-fit font-semibold py-1 connect-bg"
+          >
+            Close Deal
           </div>
         ) : null}
         {deal.client_id == address && deal.address != "0x0" && invoice?.isAcknowledged == true ? (
-          <div className="text-green cursor-pointer text-sm mt-1 flex flex-col justify-center w-fit rounded-full px-5 h-fit font-semibold py-1 connect-bg">
+          <div
+            onClick={handleCloseDeal}
+            className="text-green cursor-pointer text-sm mt-1 flex flex-col justify-center w-fit rounded-full px-5 h-fit font-semibold py-1 connect-bg"
+          >
             Close Deal
+          </div>
+        ) : null}
+        {deal.client_id == address &&
+        deal.address != "0x0" &&
+        invoice?.isAcknowledged == true &&
+        invoice?.isClosedByClient == true ? (
+          <div className="text-green-300 cursor-pointer text-sm mt-1 flex flex-col justify-center w-fit rounded-full px-5 h-fit font-semibold py-1 connect-bg">
+            Review Completed
+          </div>
+        ) : null}
+        {deal.freelancer_id == address &&
+        deal.address != "0x0" &&
+        invoice?.isAcknowledged == true &&
+        invoice?.isClosedByFreelancer == true ? (
+          <div className="text-green-300 cursor-pointer text-sm mt-1 flex flex-col justify-center w-fit rounded-full px-5 h-fit font-semibold py-1 connect-bg">
+            Review Completed
           </div>
         ) : null}
       </div>

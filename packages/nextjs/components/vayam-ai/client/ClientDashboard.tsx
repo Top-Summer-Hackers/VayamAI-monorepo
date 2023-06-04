@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Loading, RatingPopUp } from "..";
+import { Loading } from "..";
 import { useQuery } from "@tanstack/react-query";
 import { useAccount } from "wagmi";
 import { getAllTasks } from "~~/api/vayam-ai/tasks";
@@ -8,7 +8,7 @@ import { TaskItem } from "~~/types/vayam-ai/Task";
 
 const ClientDashboard = () => {
   const { address } = useAccount();
-  const [isReviewOpen, setIsReviewOpen] = useState(false);
+  // const [isReviewOpen, setIsReviewOpen] = useState(false);
   const [clientTasks, setClientTasks] = useState<TaskItem[]>([]);
   const [currentTask, setCurrentTask] = useState<TaskItem>({
     title: "",
@@ -40,7 +40,7 @@ const ClientDashboard = () => {
 
   return (
     <div className="px-5">
-      <RatingPopUp isOpen={isReviewOpen} setIsOpen={setIsReviewOpen} />
+      {/* <RatingPopUp isOpen={isReviewOpen} setIsOpen={setIsReviewOpen} /> */}
       {/* job title */}
       <div className="text-3xl font-bold mt-5">Task List (Client)</div>
       {allTasksQuery.isLoading ? (
@@ -61,12 +61,12 @@ const ClientDashboard = () => {
           <div>
             <div className="flex items-center justify-between">
               <div className="text-2xl font-semibold"></div>
-              <div
+              {/* <div
                 onClick={() => setIsReviewOpen(true)}
                 className="font-semibold border border-primary px-7 py-1 rounded-lg cursor-pointer"
               >
                 Rating
-              </div>
+              </div> */}
             </div>
             <div className="text-lg">
               {currentTask?.start_time} - {currentTask?.deadline}

@@ -93,6 +93,7 @@ const JobDetail = () => {
         clientAddr={currentDeal.client_id}
         isOpen={isCreateDealPopUp}
         setIsOpen={setIsCreateDealPopUp}
+        dealsRefetch={allDealsQuery.refetch}
       />
       {allTasksQuery.isLoading || allProposalsQuery.isLoading || allDealsQuery.isLoading ? (
         <div className="w-fit mx-auto mt-10">

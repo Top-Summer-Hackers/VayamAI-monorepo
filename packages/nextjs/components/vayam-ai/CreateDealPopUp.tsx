@@ -1,6 +1,6 @@
 import { Fragment, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
-import { useMutation } from "@tanstack/react-query";
+import { QueryObserverResult, RefetchOptions, RefetchQueryFilters, useMutation } from "@tanstack/react-query";
 import { BigNumber } from "ethers";
 import keccak256 from "keccak256";
 import { toast } from "react-hot-toast";
@@ -14,9 +14,12 @@ interface MyModalProps {
   clientAddr: string;
   proposal: ProposalItem | undefined;
   dealId: string;
+  dealsRefetch: <TPageData>(
+    options?: (RefetchOptions & RefetchQueryFilters<TPageData>) | undefined,
+  ) => Promise<QueryObserverResult<any, unknown>>;
 }
 
-export default function MyModal({ dealId, proposal, clientAddr, isOpen, setIsOpen }: MyModalProps) {
+export default function MyModal({ dealId, proposal, clientAddr, isOpen, setIsOpen, dealsRefetch }: MyModalProps) {
   const [selectedCurrency, setSelectedCurrency] = useState("usdc");
   const [duration, setDuration] = useState(0);
 
@@ -60,6 +63,7 @@ export default function MyModal({ dealId, proposal, clientAddr, isOpen, setIsOpe
       const result = await data.wait();
       console.log(result);
       setIsOpen(false);
+      dealsRefetch();
     },
   });
 

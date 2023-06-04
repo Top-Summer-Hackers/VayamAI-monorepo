@@ -1,17 +1,43 @@
 import { Fragment, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
+import keccak256 from "keccak256";
+import { toast } from "react-hot-toast";
 import { AiFillStar } from "react-icons/ai";
+import { useScaffoldContractWrite } from "~~/hooks/scaffold-eth";
 
 interface MyModalProps {
   isOpen: boolean;
+  invoiceAddress: string;
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export default function MyModal({ isOpen, setIsOpen }: MyModalProps) {
+export default function MyModal({ invoiceAddress, isOpen, setIsOpen }: MyModalProps) {
   const [rating, setRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
+  const [reviewText, setReviewText] = useState("");
 
+  /*************************************************************
+   * Contract interaction
+   ************************************************************/
+  const { writeAsync: closeDeal, isLoading: closeDealLoading } = useScaffoldContractWrite({
+    contractName: "VayamAI",
+    functionName: "closeDeal",
+    args: [invoiceAddress, ("0x" + keccak256(reviewText).toString("hex")) as `0x${string}`, rating] as readonly [
+      string | undefined,
+      `0x${string}` | undefined,
+      number | undefined,
+    ],
+    onSuccess: () => {
+      toast.success("Closed!");
+    },
+  });
+
+  /*************************************************************
+   * Component functions
+   ************************************************************/
   function closeModal() {
+    setRating(0);
+    setReviewText("");
     setIsOpen(false);
   }
 
@@ -27,6 +53,14 @@ export default function MyModal({ isOpen, setIsOpen }: MyModalProps) {
     setRating(index + 1);
     console.log("Rating saved:", index + 1);
   };
+
+  function handleSubmitClick() {
+    if (reviewText.trim() == "") {
+      toast.error("Please enter some review text!");
+    } else {
+      closeDeal();
+    }
+  }
 
   return (
     <>
@@ -80,9 +114,22 @@ export default function MyModal({ isOpen, setIsOpen }: MyModalProps) {
                         </div>
                       ))}
                     </div>
+                    <div className="w-full mt-5">
+                      <label htmlFor="review">Review</label>
+                      <textarea
+                        onChange={e => setReviewText(e.target.value)}
+                        value={reviewText}
+                        name="review"
+                        placeholder="Enter your review here"
+                        className="font-semibold w-full rounded-lg border border-primary outline-none bg-transparent text-base px-4 py-2"
+                      />
+                    </div>
                     {/* submit */}
-                    <div className="select-none mt-10 text-base cursor-pointer font-semibold w-full connect-bg rounded-full py-3 text-center">
-                      Submit
+                    <div
+                      onClick={handleSubmitClick}
+                      className="select-none mt-10 text-base cursor-pointer font-semibold w-full connect-bg rounded-full py-3 text-center"
+                    >
+                      {closeDealLoading ? "Loading..." : "Submit"}
                     </div>
                   </div>
                 </Dialog.Panel>
