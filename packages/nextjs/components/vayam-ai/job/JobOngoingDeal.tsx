@@ -52,6 +52,8 @@ const JobOngoingDeal = ({ deal, setIsCreateDealPopUp }: JobOngoingDealProps) => 
     setIsRatingOpen(true);
   }
 
+  console.log("DEBUGGing", invoice);
+
   return (
     <div className="w-full grid grid-cols-3">
       <RatingPopUp invoiceAddress={deal.address} isOpen={isRatingOpen} setIsOpen={setIsRatingOpen} />

@@ -1782,7 +1782,7 @@ const contracts = {
           ],
         },
         SmartInvoiceFactory: {
-          address: "0x7a2c9B5fEe2d67f76556F799b55651863D973014",
+          address: "0xaA86E9577585Bf948E6086Fb4419c65e02FCA480",
           abi: [
             {
               inputs: [
@@ -2392,7 +2392,7 @@ const contracts = {
           ],
         },
         VayamAI: {
-          address: "0xa11d3F9d306305886c84A39EA3cFdc84cEACDf23",
+          address: "0x252CF74250cd2311dA4Db5d3A6b81A2b97006F5e",
           abi: [
             {
               inputs: [

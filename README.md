@@ -39,6 +39,16 @@ The protocol supports Ai centric culture by providing a place for established fr
 
 How does it work? First create a profile with your Ethereum wallet as a client (aka employer) or provider (aka freelancer). Next create a task posting with a description, list of skills required, start date and milestones. Freelancers will be able to submit proposals to the task. Next select a proposal that will become a new agreement. Submit the first milestone payment using smart invoice. After work is completed, and all payments are released, complete the task with a review and rating of the freelancer. If a freelancer completes 10 tasks with 5/5 star ratings, they are minted a Soul Bound NFT, that then grants them the privilege of being a mentor on the platform, posting in the mentors articles page and collecting tips and payments for their mentorship (full completion of this feature will be post hackathon MVP).
 
+## Deployed Contract
+
+### Polygon Mumbai
+
+| Title               | Address                                    |
+| ------------------- | ------------------------------------------ |
+| Arbitrator          | 0x0Cd47282F796b9C7b75E2Ea53B13eDeb4C308f34 |
+| SmartInvoiceFactory | 0xaA86E9577585Bf948E6086Fb4419c65e02FCA480 |
+| VayamAI             | 0x252CF74250cd2311dA4Db5d3A6b81A2b97006F5e |
+
 # Revolutionizing Freelancing: The Future of Decentralized Employment
 
 ![nomad-graphic-3.jpeg](./assets/nomad-graphic-3.png)
