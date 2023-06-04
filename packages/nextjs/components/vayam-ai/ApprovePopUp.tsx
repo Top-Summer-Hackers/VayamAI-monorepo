@@ -19,11 +19,17 @@ export default function MyModal({ setIsApproved, invoiceAddr, tokenAddr, amount,
    * Contract interaction
    ************************************************************/
   const { data: USDCContract } = useDeployedContractInfo("USDC");
+  const { data: VayamAIContract } = useDeployedContractInfo("VayamAI");
+
+  console.log("DEBUGGING:", amount);
 
   const { writeAsync: approveUSDC } = useScaffoldContractWrite({
     contractName: "USDC",
     functionName: "approve",
-    args: [invoiceAddr, amount as unknown as BigNumber] as readonly [string | undefined, BigNumber | undefined],
+    args: [VayamAIContract?.address, amount as unknown as BigNumber] as readonly [
+      string | undefined,
+      BigNumber | undefined,
+    ],
     onSuccess: () => {
       toast.success("Acknowledged!");
       setIsApproved(true);
@@ -33,7 +39,10 @@ export default function MyModal({ setIsApproved, invoiceAddr, tokenAddr, amount,
   const { writeAsync: approveDAI } = useScaffoldContractWrite({
     contractName: "DAI",
     functionName: "approve",
-    args: [invoiceAddr, amount as unknown as BigNumber] as readonly [string | undefined, BigNumber | undefined],
+    args: [VayamAIContract?.address, amount as unknown as BigNumber] as readonly [
+      string | undefined,
+      BigNumber | undefined,
+    ],
     onSuccess: () => {
       toast.success("Acknowledged!");
       setIsApproved(true);
@@ -89,11 +98,11 @@ export default function MyModal({ setIsApproved, invoiceAddr, tokenAddr, amount,
                     <img src="/register/clip.png" alt="" className="w-10 h-10" />
                   </div>
                   <Dialog.Title as="h3" className="mt-5 text-2xl font-medium leading-6 text-center">
-                    Approve
+                    Approve {+amount / 10} {tokenAddr == USDCContract?.address ? "USDC" : "DAI"}
                   </Dialog.Title>
                   <div className="mt-5">
                     <div className="text-center text-xl font-light">
-                      Approve to Invoice contract
+                      Approve to Vayam AI contract
                       <br /> {truncateEthAddress(invoiceAddr)}
                     </div>
                     <div className="mt-2 text-center text-xl font-light">

@@ -2,6 +2,7 @@ import { Fragment, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { QueryObserverResult, RefetchOptions, RefetchQueryFilters, useMutation } from "@tanstack/react-query";
 import { BigNumber } from "ethers";
+import { ethers } from "ethers";
 import keccak256 from "keccak256";
 import { toast } from "react-hot-toast";
 import { updateDeal } from "~~/api/vayam-ai/deal";
@@ -50,7 +51,9 @@ export default function MyModal({ dealId, proposal, clientAddr, isOpen, setIsOpe
       selectedCurrency == "usdc" ? USDCContract?.address : DAIContract?.address,
       (duration * 24 * 60 * 60) as unknown as BigNumber,
       ("0x" + keccak256(``).toString("hex")) as `0x${string}`,
-      proposal?.milestones.map(milestone => milestone.price as unknown as BigNumber),
+      proposal?.milestones.map(
+        milestone => ethers.utils.parseEther(milestone.price.toString()) as unknown as BigNumber,
+      ),
     ] as readonly [
       string | undefined,
       string | undefined,

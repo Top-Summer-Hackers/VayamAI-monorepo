@@ -74,9 +74,9 @@ const ClientDashboard = () => {
             <div className="mt-5">{currentTask?.description}</div>
             {/* Pending Review */}
             <div className="mt-5">
-              <div className="text-2xl font-semibold">Pending Review</div>
+              {/* <div className="text-2xl font-semibold">Pending Review</div> */}
               {/* milestones */}
-              <div className="mt-3 flex flex-col gap-3">
+              {/* <div className="mt-3 flex flex-col gap-3">
                 <div className="grid grid-cols-4 items-center">
                   <div>Job description</div>
                   <div className="text-sideColor">$xxx</div>
@@ -87,7 +87,7 @@ const ClientDashboard = () => {
                     <div className="cursor-pointer connect-bg text-center rounded-lg w-fit px-7 py-1">Confirm</div>
                   </div>
                 </div>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>
