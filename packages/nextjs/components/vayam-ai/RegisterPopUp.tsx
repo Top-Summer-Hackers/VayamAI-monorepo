@@ -46,7 +46,8 @@ export default function MyModal({ isOpen, setIsOpen }: MyModalProps) {
       ("0x" + keccak256(selectedRole).toString("hex")) as `0x${string}`,
       userCount,
     ] as readonly [`0x${string}` | undefined, `0x${string}` | undefined, BigNumber | undefined],
-    onSuccess: () => {
+    onSuccess: async data => {
+      await data.wait();
       if (selectedRole === "freelancer") {
         registerAsFreelancerMutation.mutate({
           ...authenticationInformation,

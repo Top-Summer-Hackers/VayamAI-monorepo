@@ -8,6 +8,7 @@ import RatingPopUp from "./RatingPopUp";
 import RegisterPopUp from "./RegisterPopUp";
 import SubmitProposalPopUp from "./SubmitProposalPopUp";
 import SubmitTaskPopup from "./SubmitTaskPopup";
+import TopUpPopUp from "./TopUpPopUp";
 
 export {
   CreateDealPopUp,
@@ -20,4 +21,5 @@ export {
   SubmitTaskPopup,
   SubmitProposalPopUp,
   ApprovePopUp,
+  TopUpPopUp,
 };
