@@ -59,7 +59,7 @@ const ClientDashboard = () => {
           <div className="lg:after:absolute lg:after:left-[50%] lg:after:-translate-x-[50%] lg:after:content-[''] lg:after:h-full lg:after:w-[2px] lg:after:bg-white flex flex-col gap-8">
             {clientTasks.map(task => (
               <div key={task.id} onClick={() => setCurrentTask(task)}>
-                <TaskList key={task.id} task={task} />
+                <TaskList task={task} />
               </div>
             ))}
           </div>

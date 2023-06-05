@@ -5,13 +5,17 @@ import { useQuery } from "@tanstack/react-query";
 import { useContract, useProvider, useSigner } from "wagmi";
 import { getAllDeals } from "~~/api/vayam-ai/deal";
 import { Deal } from "~~/types/vayam-ai/Deals";
+import { Proposal } from "~~/types/vayam-ai/Proposal";
 import { TaskItem } from "~~/types/vayam-ai/Task";
 
 interface TaskPreviewProps {
-  currentTask: TaskItem;
+  item: {
+    task: TaskItem;
+    proposal: Proposal;
+  };
 }
 
-const TaskPreview = ({ currentTask }: TaskPreviewProps) => {
+const ProviderPreview = ({ item }: TaskPreviewProps) => {
   const { data: signer } = useSigner();
   const provider = useProvider();
 
@@ -36,7 +40,7 @@ const TaskPreview = ({ currentTask }: TaskPreviewProps) => {
     queryKey: ["clientTaskPreviewDeal"],
     queryFn: () => getAllDeals(),
     onSuccess: data => {
-      const dealRes = data.deals.find((deal: Deal) => deal.task_id == currentTask.id);
+      const dealRes = data.deals.find((deal: Deal) => deal.task_id == item.task.id);
       setDeal(dealRes);
     },
   });
@@ -58,9 +62,6 @@ const TaskPreview = ({ currentTask }: TaskPreviewProps) => {
     getInvoiceDetails();
   }, [deal?.address]);
 
-  console.log(currentTask);
-  console.log(deal);
-
   return (
     <div>
       {allDealsQuery.isLoading || isFetchingData ? (
@@ -70,7 +71,9 @@ const TaskPreview = ({ currentTask }: TaskPreviewProps) => {
       ) : (
         <div>
           <div className="flex items-center justify-between">
-            <div className="text-2xl font-semibold">{currentTask.title}</div>
+            <div className="text-2xl font-semibold">
+              {item.task.title} ({item.proposal.accepted ? "Accepted" : "Pending"})
+            </div>
             {/* <div
                 onClick={() => setIsReviewOpen(true)}
                 className="font-semibold border border-primary px-7 py-1 rounded-lg cursor-pointer"
@@ -79,9 +82,9 @@ const TaskPreview = ({ currentTask }: TaskPreviewProps) => {
               </div> */}
           </div>
           <div className="text-lg">
-            {currentTask?.start_time} - {currentTask?.deadline}
+            {item.task?.start_time} - {item.task?.deadline}
           </div>
-          <div className="mt-5">{currentTask?.description}</div>
+          <div className="mt-5">{item.task?.description}</div>
           {/* Ongoing Deal */}
           <div className="mt-5">
             <div className="text-2xl font-semibold">Ongoing Deal</div>
@@ -116,18 +119,19 @@ const TaskPreview = ({ currentTask }: TaskPreviewProps) => {
               </div>
             </div>
             {/* milestones */}
-            {/* <div className="mt-3 flex flex-col gap-3">
-              <div className="grid grid-cols-4 items-center">
-                <div>Job description</div>
-                <div className="text-sideColor">$xxx</div>
-                <div className="place-self-start flex items-center gap-1">
-                  <div className="col-span-2 cursor-pointer text-center rounded-lg w-fit px-7 py-1 border border-primary">
-                    View
+            <div className="mt-5 text-2xl font-semibold">Proposed Milestones</div>
+            <div></div>
+            <div className="mt-3 flex flex-col gap-3">
+              {item.proposal.milestones.map(proposal => (
+                <div key={proposal.description} className="grid grid-cols-4 items-center">
+                  <div>{proposal.description}</div>
+                  <div className="text-sideColor">${proposal.price}</div>
+                  <div className="place-self-start flex items-center gap-1">
+                    <div className="cursor-pointer connect-bg text-center rounded-lg w-fit px-7 py-1">Submit</div>
                   </div>
-                  <div className="cursor-pointer connect-bg text-center rounded-lg w-fit px-7 py-1">Confirm</div>
                 </div>
-              </div>
-            </div> */}
+              ))}
+            </div>
           </div>
         </div>
       )}
@@ -135,4 +139,4 @@ const TaskPreview = ({ currentTask }: TaskPreviewProps) => {
   );
 };
 
-export default TaskPreview;
+export default ProviderPreview;

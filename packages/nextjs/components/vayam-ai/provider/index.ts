@@ -1,5 +1,8 @@
 import ProposalList from "./ProposalList";
 import ProviderDashboard from "./ProviderDashboard";
+import ProviderTaskList from "./ProviderTaskList";
 import TaskList from "./TaskList";
 
-export { TaskList, ProviderDashboard, ProposalList };
+ProviderTaskList;
+
+export { TaskList, ProviderDashboard, ProposalList, ProviderTaskList };
