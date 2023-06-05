@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Loading } from "..";
+import SomethingWentWrong from "../SomethingWentWrong";
 import { useQuery } from "@tanstack/react-query";
 import { useAccount } from "wagmi";
 import { getAllTasks } from "~~/api/vayam-ai/tasks";
@@ -46,6 +47,10 @@ const ClientDashboard = () => {
       {allTasksQuery.isLoading ? (
         <div className="w-fit mx-auto mt-10">
           <Loading />
+        </div>
+      ) : clientTasks.length <= 0 ? (
+        <div>
+          <SomethingWentWrong title="No job posted yet" />
         </div>
       ) : (
         <div className="relative mt-5 w-full grid grid-cols-1 lg:grid-cols-2 gap-10">

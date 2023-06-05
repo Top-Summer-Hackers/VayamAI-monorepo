@@ -1,16 +1,16 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useRouter } from "next/router";
+import { escrow } from "../../../constant/abi.json";
 import { useQuery } from "@tanstack/react-query";
-import { BigNumber } from "ethers";
 import { toast } from "react-hot-toast";
 import { IoIosAdd } from "react-icons/io";
 import truncateEthAddress from "truncate-eth-address";
-import { useAccount, useBalance } from "wagmi";
+import { useAccount, useBalance, useContract, useProvider, useSigner } from "wagmi";
 import { getAllDeals } from "~~/api/vayam-ai/deal";
 import { getAllProposals } from "~~/api/vayam-ai/proposal";
 import { Loading, TopUpPopUp } from "~~/components/vayam-ai";
 import VayamAIContext from "~~/context/context";
-import { useScaffoldContractRead, useScaffoldContractWrite } from "~~/hooks/scaffold-eth";
+import { useScaffoldContractRead } from "~~/hooks/scaffold-eth";
 import { Deal } from "~~/types/vayam-ai/Deals";
 import { Proposal, ProposalItem } from "~~/types/vayam-ai/Proposal";
 
@@ -18,10 +18,11 @@ const InvoiceDetail = () => {
   const router = useRouter();
   const { address: walletAddress } = useAccount();
   const { userType, clientKeccak256 } = useContext(VayamAIContext);
+  const { data: signer } = useSigner();
+  const provider = useProvider();
 
   const { id, address } = router.query;
   const { data } = useBalance({ address: address != undefined ? String(address) : "" });
-  console.log(id, address);
 
   const [deal, setDeal] = useState<Deal>({
     address: "",
@@ -35,7 +36,11 @@ const InvoiceDetail = () => {
   });
   const [proposal, setProposal] = useState<Proposal>();
   const [isTopUpOpen, setIsTopUpOpen] = useState(false);
-  const [selectedMileStone, setSelectedMileStone] = useState(0);
+  const [numberOfMilestones, setNumberOfMilestones] = useState(0);
+  const [numberOfReleased, setNumberOfReleased] = useState(0);
+  const [milestoneAmounts, setMilestoneAmounts] = useState([]);
+  const [isFetchingData, setIsFetchingData] = useState(false);
+  console.log(milestoneAmounts);
 
   /*************************************************************
    * Backend interaction
@@ -61,33 +66,45 @@ const InvoiceDetail = () => {
   /*************************************************************
    * Contract interaction
    ************************************************************/
-  const { writeAsync: releaseMilestone } = useScaffoldContractWrite({
-    contractName: "EscrowImplementation",
-    functionName: "release",
-    args: [selectedMileStone as unknown as BigNumber] as readonly [BigNumber | undefined],
-    onSuccess: () => {
-      toast.success("Released Milestone!");
-    },
+  const escrowContract = useContract({
+    address: (address as string) || "",
+    abi: escrow,
+    signerOrProvider: signer || provider,
   });
+
+  async function getInvoiceDetails() {
+    setIsFetchingData(true);
+    try {
+      const amounts = await escrowContract?.getAmounts();
+      const released = await escrowContract?.released();
+      const milestones = await escrowContract?.milestone();
+      setMilestoneAmounts(amounts);
+      setNumberOfReleased(released);
+      setNumberOfMilestones(milestones);
+    } catch (error) {
+      toast.error("Get invoice details failed!");
+    }
+    setIsFetchingData(false);
+  }
+
+  async function releaseMilestone(index: number) {
+    try {
+      console.log(escrowContract);
+      const res = await escrowContract?.release(index, {
+        gasLimit: 1000000,
+      });
+      await res.wait();
+      toast.success("Released Milestone!");
+    } catch (error) {
+      console.log(error);
+      toast.error("Release milestone failed!");
+    }
+  }
+
   const { data: invoice, isLoading: getInvoiceLoading } = useScaffoldContractRead({
     contractName: "VayamAI",
     functionName: "getInvoice",
     args: [address] as readonly [string | undefined],
-    enabled: address != undefined,
-  });
-  const { data: numberOfMilestones, isLoading: numberOfMilestonesLoading } = useScaffoldContractRead({
-    contractName: "EscrowImplementation",
-    functionName: "milestone",
-    enabled: address != undefined,
-  });
-  const { data: numberOfReleased, isLoading: numberOfReleasedLoading } = useScaffoldContractRead({
-    contractName: "EscrowImplementation",
-    functionName: "released",
-    enabled: address != undefined,
-  });
-  const { data: milestoneAmounts, isLoading: milestoneAmountsLoading } = useScaffoldContractRead({
-    contractName: "EscrowImplementation",
-    functionName: "getAmounts",
     enabled: address != undefined,
   });
 
@@ -95,23 +112,16 @@ const InvoiceDetail = () => {
    * Component functions
    ************************************************************/
   function handleRelease(index: number) {
-    setSelectedMileStone(index);
-    releaseMilestone();
+    releaseMilestone(index);
   }
 
-  // console.log(invoice);
-  // console.log(deal);
-  // console.log(proposal);
-  console.log(milestoneAmounts);
+  useEffect(() => {
+    getInvoiceDetails();
+  }, []);
 
   return (
     <div>
-      {getInvoiceLoading ||
-      dealQuery.isLoading ||
-      proposalQuery.isLoading ||
-      numberOfReleasedLoading ||
-      numberOfMilestonesLoading ||
-      milestoneAmountsLoading ? (
+      {getInvoiceLoading || dealQuery.isLoading || proposalQuery.isLoading || isFetchingData ? (
         <div className="w-fit mx-auto mt-10">
           <Loading />
         </div>
@@ -182,7 +192,10 @@ const InvoiceDetail = () => {
               <div className="grid grid-cols-2 gap-10">
                 <div className="mt-3 flex flex-col gap-5">
                   {proposal?.milestones.map((milestone, index) => (
-                    <div key={milestone.description + index} className="border-l-2 pl-3 border-sideColor">
+                    <div
+                      key={milestone.deadline + index + milestone.description}
+                      className="border-l-2 pl-3 border-sideColor"
+                    >
                       <div className="flex justify-between items-center">
                         <div>
                           <div className="font-semibold">{milestone.description}</div>
@@ -223,9 +236,9 @@ const InvoiceDetail = () => {
                       ></div>
                     </div>
                     <div>
-                      {milestoneAmounts?.map(amount => (
+                      {milestoneAmounts?.map((amount, index) => (
                         <div
-                          key={parseInt(String(amount))}
+                          key={parseInt(String(amount)) + index}
                           style={{
                             width: parseInt(String(numberOfMilestones)) / 100,
                           }}
