@@ -221,32 +221,34 @@ const InvoiceDetail = () => {
                     </div>
                   ))}
                 </div>
-
                 <div>
-                  <div className="">
+                  <div>
                     <div className="h-[10px] w-full bg-white rounded-full">
                       <div
                         style={{
-                          width:
+                          width: `${
                             parseInt(String(numberOfReleased)) == 0
                               ? 0
-                              : (parseInt(String(numberOfReleased)) / parseInt(String(numberOfMilestones))) * 100,
+                              : (parseInt(String(numberOfReleased)) / parseInt(String(milestoneAmounts?.length))) * 100
+                          }%`,
                         }}
                         className="h-[10px] bg-sideColor rounded-full"
                       ></div>
                     </div>
                     <div>
-                      {milestoneAmounts?.map((amount, index) => (
-                        <div
-                          key={parseInt(String(amount)) + index}
-                          style={{
-                            width: parseInt(String(numberOfMilestones)) / 100,
-                          }}
-                          className="inline-block"
-                        >
-                          ${parseInt(String(amount))}
-                        </div>
-                      ))}
+                      {milestoneAmounts?.map((amount, index) => {
+                        return (
+                          <div
+                            key={parseInt(String(amount)) + index}
+                            style={{
+                              width: `${100 / parseInt(String(milestoneAmounts?.length))}%`,
+                            }}
+                            className="inline-block text-sideColor"
+                          >
+                            ${parseInt(String(amount))}
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 </div>

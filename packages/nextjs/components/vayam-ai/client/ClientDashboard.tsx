@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Loading } from "..";
 import SomethingWentWrong from "../SomethingWentWrong";
+import TaskPreview from "./TaskPreview";
 import { useQuery } from "@tanstack/react-query";
 import { useAccount } from "wagmi";
 import { getAllTasks } from "~~/api/vayam-ai/tasks";
@@ -63,38 +64,7 @@ const ClientDashboard = () => {
             ))}
           </div>
           {/* preview */}
-          <div>
-            <div className="flex items-center justify-between">
-              <div className="text-2xl font-semibold"></div>
-              {/* <div
-                onClick={() => setIsReviewOpen(true)}
-                className="font-semibold border border-primary px-7 py-1 rounded-lg cursor-pointer"
-              >
-                Rating
-              </div> */}
-            </div>
-            <div className="text-lg">
-              {currentTask?.start_time} - {currentTask?.deadline}
-            </div>
-            <div className="mt-5">{currentTask?.description}</div>
-            {/* Pending Review */}
-            <div className="mt-5">
-              {/* <div className="text-2xl font-semibold">Pending Review</div> */}
-              {/* milestones */}
-              {/* <div className="mt-3 flex flex-col gap-3">
-                <div className="grid grid-cols-4 items-center">
-                  <div>Job description</div>
-                  <div className="text-sideColor">$xxx</div>
-                  <div className="place-self-start flex items-center gap-1">
-                    <div className="col-span-2 cursor-pointer text-center rounded-lg w-fit px-7 py-1 border border-primary">
-                      View
-                    </div>
-                    <div className="cursor-pointer connect-bg text-center rounded-lg w-fit px-7 py-1">Confirm</div>
-                  </div>
-                </div>
-              </div> */}
-            </div>
-          </div>
+          <TaskPreview currentTask={currentTask} />
         </div>
       )}
     </div>
