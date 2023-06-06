@@ -37,7 +37,7 @@ const ProviderPreview = ({ item }: TaskPreviewProps) => {
    * Backend interaction
    ************************************************************/
   const allDealsQuery = useQuery({
-    queryKey: ["clientTaskPreviewDeal"],
+    queryKey: ["providerTaskPreviewDeal"],
     queryFn: () => getAllDeals(),
     onSuccess: data => {
       const dealRes = data.deals.find((deal: Deal) => deal.task_id == item.task.id);
@@ -50,7 +50,7 @@ const ProviderPreview = ({ item }: TaskPreviewProps) => {
     try {
       const amounts = await escrowContract?.getAmounts();
       const released = await escrowContract?.released();
-      setMilestoneAmounts(amounts);
+      setMilestoneAmounts(amounts.length);
       setNumberOfReleased(released);
     } catch (error) {
       // toast.error("Get invoice details failed!");
