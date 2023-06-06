@@ -10,8 +10,9 @@ interface MyModalProps {
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
   InvoiceAddr: string;
   tokenAddr: string;
+  getInvoiceDetails: () => Promise<void>;
 }
-export default function MyModal({ isOpen, setIsOpen, InvoiceAddr, tokenAddr }: MyModalProps) {
+export default function MyModal({ isOpen, setIsOpen, InvoiceAddr, tokenAddr, getInvoiceDetails }: MyModalProps) {
   const [amount, setAmount] = useState(0);
 
   /*************************************************************
@@ -29,6 +30,7 @@ export default function MyModal({ isOpen, setIsOpen, InvoiceAddr, tokenAddr }: M
     onSuccess: () => {
       closeModal();
       setAmount(0);
+      getInvoiceDetails();
       toast.success("Top Up Successfully!");
     },
   });
@@ -42,6 +44,7 @@ export default function MyModal({ isOpen, setIsOpen, InvoiceAddr, tokenAddr }: M
     onSuccess: () => {
       closeModal();
       setAmount(0);
+      getInvoiceDetails();
       toast.success("Top Up Successfully!");
     },
   });

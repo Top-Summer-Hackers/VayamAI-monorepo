@@ -2,7 +2,9 @@ import React, { useEffect, useState } from "react";
 import { escrow } from "../../../constant/abi.json";
 import Loading from "../Loading";
 import { useQuery } from "@tanstack/react-query";
-import { useContract, useProvider, useSigner } from "wagmi";
+import { ethers } from "ethers";
+import { toast } from "react-hot-toast";
+import { useAccount, useContract, useProvider, useSigner } from "wagmi";
 import { getAllDeals } from "~~/api/vayam-ai/deal";
 import { Deal } from "~~/types/vayam-ai/Deals";
 import { TaskItem } from "~~/types/vayam-ai/Task";
@@ -12,12 +14,16 @@ interface TaskPreviewProps {
 }
 
 const TaskPreview = ({ currentTask }: TaskPreviewProps) => {
+  const { address } = useAccount();
   const { data: signer } = useSigner();
   const provider = useProvider();
 
   const [deal, setDeal] = useState<Deal>();
+  // const [currentMileStone, setCurrentMilestone] = useState(0);
   const [numberOfReleased, setNumberOfReleased] = useState(0);
   const [milestoneAmounts, setMilestoneAmounts] = useState([]);
+  const [tokenContractAddr, setTokenContractAddr] = useState("");
+  // const [invoiceBalance, setInvoiceBalance] = useState("-1");
   const [isFetchingData, setIsFetchingData] = useState(false);
 
   /*************************************************************
@@ -28,6 +34,11 @@ const TaskPreview = ({ currentTask }: TaskPreviewProps) => {
     abi: escrow,
     signerOrProvider: signer || provider,
   });
+  // const tokenContract = useContract({
+  //   address: (tokenContractAddr as string) || "",
+  //   abi: token,
+  //   signerOrProvider: signer || provider,
+  // });
 
   /*************************************************************
    * Backend interaction
@@ -42,14 +53,21 @@ const TaskPreview = ({ currentTask }: TaskPreviewProps) => {
   });
 
   async function getInvoiceDetails() {
+    console.log("CALL:getInvoiceDetails");
     setIsFetchingData(true);
     try {
       const amounts = await escrowContract?.getAmounts();
-      const released = await escrowContract?.released();
+      const milestone = await escrowContract?.milestone(); // get current milestone
+      const token = await escrowContract?.token();
+      // setCurrentMilestone(milestone);
       setMilestoneAmounts(amounts);
-      setNumberOfReleased(released);
+      setNumberOfReleased(milestone);
+      setTokenContractAddr(token);
+
+      // const invoiceBalance = await tokenContract?.balanceOf(deal?.address);
+      // setInvoiceBalance(invoiceBalance);
     } catch (error) {
-      // toast.error("Get invoice details failed!");
+      toast.error("Get invoice details failed!");
     }
     setIsFetchingData(false);
   }
@@ -58,8 +76,9 @@ const TaskPreview = ({ currentTask }: TaskPreviewProps) => {
     getInvoiceDetails();
   }, [deal?.address]);
 
-  console.log(currentTask);
-  console.log(deal);
+  useEffect(() => {
+    getInvoiceDetails();
+  }, [tokenContractAddr, address, escrowContract]);
 
   return (
     <div>
@@ -109,7 +128,7 @@ const TaskPreview = ({ currentTask }: TaskPreviewProps) => {
                       }}
                       className="inline-block text-sideColor"
                     >
-                      ${parseInt(String(amount))}
+                      ${ethers.utils.formatEther(String(amount))}
                     </div>
                   );
                 })}

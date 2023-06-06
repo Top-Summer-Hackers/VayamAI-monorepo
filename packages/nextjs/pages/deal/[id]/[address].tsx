@@ -1,16 +1,17 @@
 import React, { useContext, useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import { escrow } from "../../../constant/abi.json";
+import { escrow, token } from "../../../constant/abi.json";
 import { useQuery } from "@tanstack/react-query";
+import { ethers } from "ethers";
 import { toast } from "react-hot-toast";
 import { IoIosAdd } from "react-icons/io";
 import truncateEthAddress from "truncate-eth-address";
-import { useAccount, useBalance, useContract, useProvider, useSigner } from "wagmi";
+import { useAccount, useContract, useProvider, useSigner } from "wagmi";
 import { getAllDeals } from "~~/api/vayam-ai/deal";
 import { getAllProposals } from "~~/api/vayam-ai/proposal";
 import { Loading, TopUpPopUp } from "~~/components/vayam-ai";
 import VayamAIContext from "~~/context/context";
-import { useScaffoldContractRead } from "~~/hooks/scaffold-eth";
+import { useDeployedContractInfo, useScaffoldContractRead } from "~~/hooks/scaffold-eth";
 import { Deal } from "~~/types/vayam-ai/Deals";
 import { Proposal, ProposalItem } from "~~/types/vayam-ai/Proposal";
 
@@ -22,7 +23,6 @@ const InvoiceDetail = () => {
   const provider = useProvider();
 
   const { id, address } = router.query;
-  const { data } = useBalance({ address: address != undefined ? String(address) : "" });
 
   const [deal, setDeal] = useState<Deal>({
     address: "",
@@ -36,11 +36,12 @@ const InvoiceDetail = () => {
   });
   const [proposal, setProposal] = useState<Proposal>();
   const [isTopUpOpen, setIsTopUpOpen] = useState(false);
-  const [numberOfMilestones, setNumberOfMilestones] = useState(0);
+  const [currentMileStone, setCurrentMilestone] = useState(0);
   const [numberOfReleased, setNumberOfReleased] = useState(0);
   const [milestoneAmounts, setMilestoneAmounts] = useState([]);
   const [isFetchingData, setIsFetchingData] = useState(false);
-  console.log(milestoneAmounts);
+  const [tokenContractAddr, setTokenContractAddr] = useState("");
+  const [invoiceBalance, setInvoiceBalance] = useState("-1");
 
   /*************************************************************
    * Backend interaction
@@ -60,26 +61,40 @@ const InvoiceDetail = () => {
       const proposal = data.proposals.find((proposal: ProposalItem) => proposal.id == deal.proposal_id);
       setProposal(proposal);
     },
-    enabled: deal.id != "-1",
+    enabled: deal?.id != "-1",
   });
 
   /*************************************************************
    * Contract interaction
    ************************************************************/
+  const { data: USDCContract } = useDeployedContractInfo("USDC");
+  const { data: DAIContract } = useDeployedContractInfo("DAI");
+
   const escrowContract = useContract({
     address: (address as string) || "",
     abi: escrow,
     signerOrProvider: signer || provider,
   });
+  const tokenContract = useContract({
+    address: (tokenContractAddr as string) || "",
+    abi: token,
+    signerOrProvider: signer || provider,
+  });
 
   async function getInvoiceDetails() {
+    console.log("CALL:getInvoiceDetails");
     setIsFetchingData(true);
     try {
       const amounts = await escrowContract?.getAmounts();
-      const milestone = await escrowContract?.milestone();
+      const milestone = await escrowContract?.milestone(); // get current milestone
+      const token = await escrowContract?.token();
+      setCurrentMilestone(milestone);
       setMilestoneAmounts(amounts);
       setNumberOfReleased(milestone);
-      setNumberOfMilestones(amounts.length);
+      setTokenContractAddr(token);
+
+      const invoiceBalance = await tokenContract?.balanceOf(address);
+      setInvoiceBalance(invoiceBalance);
     } catch (error) {
       toast.error("Get invoice details failed!");
     }
@@ -88,9 +103,9 @@ const InvoiceDetail = () => {
 
   async function releaseMilestone(index: number) {
     try {
-      console.log(escrowContract);
-      const res = await escrowContract?.release(index);
+      const res = await escrowContract?.release(index, { gasLimit: 1000000 });
       await res.wait();
+      await getInvoiceDetails();
       toast.success("Released Milestone!");
     } catch (error) {
       console.log(error);
@@ -114,7 +129,7 @@ const InvoiceDetail = () => {
 
   useEffect(() => {
     getInvoiceDetails();
-  }, []);
+  }, [tokenContractAddr, walletAddress, escrowContract]);
 
   return (
     <div>
@@ -125,6 +140,7 @@ const InvoiceDetail = () => {
       ) : (
         <div>
           <TopUpPopUp
+            getInvoiceDetails={getInvoiceDetails}
             tokenAddr={invoice?.token || ""}
             InvoiceAddr={(address as string) || ""}
             isOpen={isTopUpOpen}
@@ -183,14 +199,29 @@ const InvoiceDetail = () => {
                   </div>
                 )}
               </div>
-              <div>Current Milestone: {numberOfMilestones == undefined ? "" : String(numberOfMilestones)}</div>
+              <div>Total Milestones: {milestoneAmounts == undefined ? "" : String(milestoneAmounts.length)}</div>
               <div>Released Milestones: {numberOfReleased == undefined ? "" : String(numberOfReleased)}</div>
-              <div>Total Value Locked: {String(data?.value)}</div>
+              <div>
+                Total Value Locked:{" "}
+                {invoiceBalance != "-1" && invoiceBalance != undefined
+                  ? ethers.utils.formatEther(
+                      invoiceBalance != "-1" && invoiceBalance != undefined ? invoiceBalance : "0",
+                    )
+                  : "0"}
+                {tokenContractAddr == USDCContract?.address
+                  ? "USDC"
+                  : tokenContractAddr == DAIContract?.address
+                  ? "DAI"
+                  : ""}
+              </div>
             </div>
           </div>
           <div>
-            <div>
-              <div className="text-2xl font-bold mt-10">Milestones</div>
+            <div className="mt-10">
+              <div className="text-2xl font-bold grid grid-cols-2 mb-2">
+                <div>Milestones</div>
+                <div>Deal Processestones</div>
+              </div>
               <div className="grid grid-cols-2 gap-10">
                 <div className="mt-3 flex flex-col gap-5">
                   {proposal?.milestones.map((milestone, index) => (
@@ -207,8 +238,9 @@ const InvoiceDetail = () => {
                         {userType != undefined &&
                         userType == clientKeccak256 &&
                         invoice?.client == walletAddress &&
-                        numberOfReleased &&
-                        parseInt(String(numberOfReleased)) <= index ? (
+                        invoice?.isAcknowledged &&
+                        currentMileStone &&
+                        parseInt(String(currentMileStone)) == index ? (
                           <div
                             onClick={() => handleRelease(index)}
                             className="cursor-pointer connect-bg rounded-full px-3 py-1"
@@ -247,7 +279,7 @@ const InvoiceDetail = () => {
                             }}
                             className="inline-block text-sideColor"
                           >
-                            ${parseInt(String(amount))}
+                            ${ethers.utils.formatEther(String(amount))}
                           </div>
                         );
                       })}
