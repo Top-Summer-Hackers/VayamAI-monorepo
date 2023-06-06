@@ -1,16 +1,17 @@
 import { Fragment, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { BigNumber } from "ethers";
+import { parseEther } from "ethers/lib/utils.js";
 import { toast } from "react-hot-toast";
 import { useDeployedContractInfo, useScaffoldContractWrite } from "~~/hooks/scaffold-eth";
 
 interface MyModalProps {
   isOpen: boolean;
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  InvoiceAddr: string;
   tokenAddr: string;
 }
-
-export default function MyModal({ isOpen, setIsOpen, tokenAddr }: MyModalProps) {
+export default function MyModal({ isOpen, setIsOpen, InvoiceAddr, tokenAddr }: MyModalProps) {
   const [amount, setAmount] = useState(0);
 
   /*************************************************************
@@ -21,7 +22,10 @@ export default function MyModal({ isOpen, setIsOpen, tokenAddr }: MyModalProps) 
   const { writeAsync: transferUSDC } = useScaffoldContractWrite({
     contractName: "USDC",
     functionName: "transfer",
-    args: [tokenAddr, amount as unknown as BigNumber] as readonly [string | undefined, BigNumber | undefined],
+    args: [InvoiceAddr, amount && (parseEther(amount.toString()) as unknown as BigNumber)] as readonly [
+      string | undefined,
+      BigNumber | undefined,
+    ],
     onSuccess: () => {
       closeModal();
       setAmount(0);
@@ -31,7 +35,10 @@ export default function MyModal({ isOpen, setIsOpen, tokenAddr }: MyModalProps) 
   const { writeAsync: transferDAI } = useScaffoldContractWrite({
     contractName: "DAI",
     functionName: "transfer",
-    args: [tokenAddr, amount as unknown as BigNumber] as readonly [string | undefined, BigNumber | undefined],
+    args: [InvoiceAddr, amount && (parseEther(amount.toString()) as unknown as BigNumber)] as readonly [
+      string | undefined,
+      BigNumber | undefined,
+    ],
     onSuccess: () => {
       closeModal();
       setAmount(0);
