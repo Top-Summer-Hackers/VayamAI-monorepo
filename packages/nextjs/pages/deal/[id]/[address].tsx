@@ -76,11 +76,10 @@ const InvoiceDetail = () => {
     setIsFetchingData(true);
     try {
       const amounts = await escrowContract?.getAmounts();
-      const released = await escrowContract?.released();
-      const milestones = await escrowContract?.milestone();
+      const milestone = await escrowContract?.milestone();
       setMilestoneAmounts(amounts);
-      setNumberOfReleased(released);
-      setNumberOfMilestones(milestones);
+      setNumberOfReleased(milestone);
+      setNumberOfMilestones(amounts.length);
     } catch (error) {
       toast.error("Get invoice details failed!");
     }
@@ -90,9 +89,7 @@ const InvoiceDetail = () => {
   async function releaseMilestone(index: number) {
     try {
       console.log(escrowContract);
-      const res = await escrowContract?.release(index, {
-        gasLimit: 1000000,
-      });
+      const res = await escrowContract?.release(index);
       await res.wait();
       toast.success("Released Milestone!");
     } catch (error) {
@@ -127,7 +124,12 @@ const InvoiceDetail = () => {
         </div>
       ) : (
         <div>
-          <TopUpPopUp tokenAddr={invoice?.token || ""} isOpen={isTopUpOpen} setIsOpen={setIsTopUpOpen} />
+          <TopUpPopUp
+            tokenAddr={invoice?.token || ""}
+            InvoiceAddr={(address as string) || ""}
+            isOpen={isTopUpOpen}
+            setIsOpen={setIsTopUpOpen}
+          />
           <div className="flex justify-between items-center">
             <div className="text-3xl font-bold mt-5">
               Invoice between {truncateEthAddress(invoice?.client || "")} and{" "}
