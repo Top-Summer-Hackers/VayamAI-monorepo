@@ -11,6 +11,8 @@ interface ISmartInvoiceEscrow is ISmartInvoice {
 
   function withdraw() external;
 
+  function token() external view returns (address);
+
   function withdrawTokens(address _token) external;
 
   function lock(bytes32 _details) external payable;
