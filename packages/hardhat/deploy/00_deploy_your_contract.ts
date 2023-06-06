@@ -9,23 +9,18 @@ const mintMockTokens = async (hre: HardhatRuntimeEnvironment, contractName: any,
 const deployYourContract: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   /*
     On localhost, the deployer account is the one that comes with Hardhat, which is already funded.
-
     When deploying to live networks (e.g `yarn deploy --network goerli`), the deployer account
     should have sufficient balance to pay for the gas fees for contract creation.
-
     You can generate a random account with `yarn generate` which will fill DEPLOYER_PRIVATE_KEY
     with a random private key in the .env file (then used on hardhat.config.ts)
     You can run the `yarn account` command to check your balance in every network.
   */
-
   const { deployer } = await hre.getNamedAccounts();
   const { deploy } = hre.deployments;
-
   // deployment objects - UPDATE when deploying to polygon
   let weth = { address: "0xc778417E063141139Fce010982780140Aa0cD5Ab" };
   let usdc = { address: "0xc778417E063141139Fce010982780140Aa0cD5Ab" };
   let dai = { address: "0xc778417E063141139Fce010982780140Aa0cD5Ab" };
-
   if (true) {
     //deploy mock tokens
     weth = await deploy("WETH", {
@@ -38,7 +33,6 @@ const deployYourContract: DeployFunction = async function (hre: HardhatRuntimeEn
       // automatically mining the contract deployment transaction. There is no effect on live networks.
       autoMine: true,
     });
-
     usdc = await deploy("USDC", {
       from: deployer,
       args: [],
@@ -46,7 +40,6 @@ const deployYourContract: DeployFunction = async function (hre: HardhatRuntimeEn
       contract: "MockToken",
       autoMine: true,
     });
-
     dai = await deploy("DAI", {
       from: deployer,
       args: [],
@@ -54,7 +47,6 @@ const deployYourContract: DeployFunction = async function (hre: HardhatRuntimeEn
       contract: "MockToken",
       autoMine: true,
     });
-
     await mintMockTokens(hre, "USDC", deployer);
     await mintMockTokens(hre, "DAI", deployer);
   }
@@ -65,7 +57,6 @@ const deployYourContract: DeployFunction = async function (hre: HardhatRuntimeEn
     contract: "MockArbitrator",
     autoMine: false,
   });
-
   await deploy("SmartInvoiceFactory", {
     from: deployer,
     args: [weth.address],
@@ -73,7 +64,6 @@ const deployYourContract: DeployFunction = async function (hre: HardhatRuntimeEn
     contract: "MockSmartInvoiceFactory",
     autoMine: true,
   });
-
   const escrowImplementation = await deploy("EscrowImplementation", {
     from: deployer,
     args: [],
@@ -81,16 +71,12 @@ const deployYourContract: DeployFunction = async function (hre: HardhatRuntimeEn
     contract: "MockSmartInvoiceEscrow",
     autoMine: true,
   });
-
   const cSmartInvoiceFactory = await hre.ethers.getContract("SmartInvoiceFactory");
-
   let tx = await cSmartInvoiceFactory.addImplementation(
     hre.ethers.utils.keccak256(hre.ethers.utils.toUtf8Bytes("escrow")),
     escrowImplementation.address,
   );
-
   await tx.wait();
-
   await deploy("VayamAI", {
     from: deployer,
     args: [weth.address, cSmartInvoiceFactory.address],
@@ -98,12 +84,9 @@ const deployYourContract: DeployFunction = async function (hre: HardhatRuntimeEn
     contract: "VayamAI",
     autoMine: true,
   });
-
   const cVayamAI = await hre.ethers.getContract("VayamAI");
-
   tx = await cVayamAI.addTokenToWhitelist(usdc.address);
   await tx.wait();
-
   tx = await cVayamAI.addTokenToWhitelist(dai.address);
   await tx.wait();
 };
