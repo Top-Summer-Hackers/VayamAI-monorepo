@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { ApprovePopUp, RatingPopUp } from "..";
+import { escrow } from "../../../constant/abi.json";
 import { toast } from "react-hot-toast";
 import truncateEthAddress from "truncate-eth-address";
-import { useAccount } from "wagmi";
+import { useAccount, useContract, useProvider, useSigner } from "wagmi";
 import { useScaffoldContractRead, useScaffoldContractWrite } from "~~/hooks/scaffold-eth";
 import { Deal } from "~~/types/vayam-ai/Deals";
 
@@ -14,10 +15,13 @@ interface JobOngoingDealProps {
 
 const JobOngoingDeal = ({ deal, setIsCreateDealPopUp }: JobOngoingDealProps) => {
   const { address } = useAccount();
+  const { data: signer } = useSigner();
+  const provider = useProvider();
 
   const [isApproveOpen, setIsApproveOpen] = useState(false);
   const [isRatingOpen, setIsRatingOpen] = useState(false);
   const [isApproved, setIsApproved] = useState(false);
+  const [terminationTime, setTerminationTime] = useState("0");
 
   /*************************************************************
    * Contract interaction
@@ -28,6 +32,7 @@ const JobOngoingDeal = ({ deal, setIsCreateDealPopUp }: JobOngoingDealProps) => 
     args: [deal.address] as readonly [string | undefined],
     enabled: deal.address != "0x0",
   });
+
   const { writeAsync: acknowledgeDeal, isLoading: acknowledgeDealLoading } = useScaffoldContractWrite({
     contractName: "VayamAI",
     functionName: "acknowledgeDeal",
@@ -36,7 +41,22 @@ const JobOngoingDeal = ({ deal, setIsCreateDealPopUp }: JobOngoingDealProps) => 
       toast.success("Acknowledged!");
     },
   });
-  console.log(invoice);
+  const escrowContract = useContract({
+    address: (deal?.address as string) || "",
+    abi: escrow,
+    signerOrProvider: signer || provider,
+  });
+  async function getInvoiceDetails() {
+    try {
+      if (escrowContract) {
+        const terminationTime = await escrowContract?.terminationTime();
+        setTerminationTime(String(terminationTime));
+      }
+    } catch (error) {
+      // console.log(error);
+      // toast.error("Get invoice details failed!");
+    }
+  }
 
   /*************************************************************
    * Component functions
@@ -54,6 +74,10 @@ const JobOngoingDeal = ({ deal, setIsCreateDealPopUp }: JobOngoingDealProps) => 
   }
 
   console.log("DEBUGGing", invoice);
+
+  useEffect(() => {
+    getInvoiceDetails();
+  }, [address, escrowContract]);
 
   return (
     <div>
@@ -77,6 +101,7 @@ const JobOngoingDeal = ({ deal, setIsCreateDealPopUp }: JobOngoingDealProps) => 
         </div>
         <div className="flex flex-col justify-center w-full h-full ">${deal.price}</div>
         <div>
+          {/* show create deal */}
           {deal.freelancer_id == address && deal.address == "0x0" ? (
             <div
               onClick={() => {
@@ -87,11 +112,13 @@ const JobOngoingDeal = ({ deal, setIsCreateDealPopUp }: JobOngoingDealProps) => 
               Create Deal
             </div>
           ) : null}
+          {/* show waiting for acknowledge */}
           {deal.freelancer_id == address && deal.address != "0x0" && invoice?.isAcknowledged == false ? (
             <div className="text-sm mt-1 flex flex-col justify-center w-fit rounded-full px-5 h-fit font-semibold py-1 connect-bg">
               Waiting Acknowledge
             </div>
           ) : null}
+          {/* show acknowledge button for client */}
           {deal.client_id == address && deal.address != "0x0" && invoice?.isAcknowledged == false ? (
             <div
               onClick={handleAcknowledge}
@@ -100,7 +127,19 @@ const JobOngoingDeal = ({ deal, setIsCreateDealPopUp }: JobOngoingDealProps) => 
               {acknowledgeDealLoading ? "Loading..." : "Acknowledge"}
             </div>
           ) : null}
-          {deal.freelancer_id == address && deal.address != "0x0" && invoice?.isAcknowledged == true ? (
+          {/* show close deal button or deal ongoing word */}
+          {(terminationTime != "0" &&
+            parseInt(String(terminationTime)) > Date.now() &&
+            deal.freelancer_id == address &&
+            deal.address != "0x0" &&
+            invoice?.isAcknowledged == true &&
+            invoice?.isClosedByFreelancer == false) ||
+          (terminationTime != "0" &&
+            parseInt(String(terminationTime)) > Date.now() &&
+            deal.client_id == address &&
+            deal.address != "0x0" &&
+            invoice?.isAcknowledged == true &&
+            invoice?.isClosedByClient == false) ? (
             <div
               onClick={handleCloseDeal}
               className="text-green cursor-pointer text-sm mt-1 flex flex-col justify-center w-fit rounded-full px-5 h-fit font-semibold py-1 connect-bg"
@@ -108,19 +147,28 @@ const JobOngoingDeal = ({ deal, setIsCreateDealPopUp }: JobOngoingDealProps) => 
               Close Deal
             </div>
           ) : null}
-          {deal.client_id == address && deal.address != "0x0" && invoice?.isAcknowledged == true ? (
-            <div
-              onClick={handleCloseDeal}
-              className="text-green cursor-pointer text-sm mt-1 flex flex-col justify-center w-fit rounded-full px-5 h-fit font-semibold py-1 connect-bg"
-            >
-              Close Deal
-            </div>
+
+          {(terminationTime != "0" &&
+            parseInt(String(terminationTime)) < Date.now() &&
+            deal.freelancer_id == address &&
+            deal.address != "0x0" &&
+            invoice?.isAcknowledged == true &&
+            invoice?.isClosedByFreelancer == false) ||
+          (terminationTime != "0" &&
+            parseInt(String(terminationTime)) < Date.now() &&
+            deal.client_id == address &&
+            deal.address != "0x0" &&
+            invoice?.isAcknowledged == true &&
+            invoice?.isClosedByClient == false) ? (
+            <div className="text-green-300 flex flex-col justify-center w-full h-full font-semibold">Deal Ongoing</div>
           ) : null}
+
+          {/* show review completed word*/}
           {deal.client_id == address &&
           deal.address != "0x0" &&
           invoice?.isAcknowledged == true &&
           invoice?.isClosedByClient == true ? (
-            <div className="text-green-300 cursor-pointer text-sm mt-1 flex flex-col justify-center w-fit rounded-full px-5 h-fit font-semibold py-1 connect-bg">
+            <div className="text-green-300 flex flex-col justify-center w-full h-full font-semibold">
               Review Completed
             </div>
           ) : null}
@@ -128,7 +176,7 @@ const JobOngoingDeal = ({ deal, setIsCreateDealPopUp }: JobOngoingDealProps) => 
           deal.address != "0x0" &&
           invoice?.isAcknowledged == true &&
           invoice?.isClosedByFreelancer == true ? (
-            <div className="text-green-300 cursor-pointer text-sm mt-1 flex flex-col justify-center w-fit rounded-full px-5 h-fit font-semibold py-1 connect-bg">
+            <div className="text-green-300 flex flex-col justify-center w-full h-full font-semibold">
               Review Completed
             </div>
           ) : null}
