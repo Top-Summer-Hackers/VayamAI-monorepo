@@ -41,6 +41,12 @@ const ClientProfile = ({ clientAddr }: ClientProfileProps) => {
     args: [clientAddr] as readonly [string | undefined],
     enabled: clientAddr != undefined,
   });
+  const { data: balanceOf, isLoading: balanceOfLoading } = useScaffoldContractRead({
+    contractName: "VayamAI",
+    functionName: "balanceOf",
+    args: [clientAddr] as readonly [string | undefined],
+    enabled: clientAddr != undefined,
+  });
 
   /*************************************************************
    * Backend interaction
@@ -59,7 +65,11 @@ const ClientProfile = ({ clientAddr }: ClientProfileProps) => {
 
   return (
     <div className="pb-24">
-      {allClientsQuery.isLoading || invoicesNoReviewCountLoading || closedInvoicesCountLoading || userScoreLoading ? (
+      {allClientsQuery.isLoading ||
+      invoicesNoReviewCountLoading ||
+      closedInvoicesCountLoading ||
+      balanceOfLoading ||
+      userScoreLoading ? (
         <div className="flex-center mt-10">
           <Loading />
         </div>
@@ -92,6 +102,10 @@ const ClientProfile = ({ clientAddr }: ClientProfileProps) => {
               <div className="text-center">
                 <div>5 Stars Rating</div>
                 <div className="font-semibold">{String(userScore)}</div>
+              </div>
+              <div className="text-center">
+                <div>Amount of Mentor NFT</div>
+                <div className="font-semibold">{String(balanceOf)}</div>
               </div>
             </div>
             <div className="mt-10">

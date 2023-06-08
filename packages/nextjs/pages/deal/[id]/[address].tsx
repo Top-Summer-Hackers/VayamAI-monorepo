@@ -162,7 +162,7 @@ const InvoiceDetail = () => {
             ) : null}
           </div>
           <div className="flex mt-5">
-            <div className="mt-2 grid grid-cols-3 gap-2">
+            <div className="mt-2 grid grid-cols-2 lg:grid-cols-3 gap-2">
               <div className="flex items-center gap-2">
                 Acknowledge Status:{" "}
                 {invoice?.isAcknowledged ? (
@@ -217,12 +217,13 @@ const InvoiceDetail = () => {
             </div>
           </div>
           <div>
-            <div className="mt-10">
-              <div className="text-2xl font-bold grid grid-cols-2 mb-2">
+            <div className="mt-10 pb-32 lg:pb-24">
+              <div className="text-2xl font-bold hidden lg:grid grid-cols-2 mb-2">
                 <div>Milestones</div>
-                <div>Deal Processestones</div>
+                <div>Deal Progress</div>
               </div>
-              <div className="grid grid-cols-2 gap-10">
+              <div className="text-2xl font-bold lg:hidden mb-2">Milestones</div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
                 <div className="mt-3 flex flex-col gap-5">
                   {proposal?.milestones.map((milestone, index) => (
                     <div
@@ -256,6 +257,7 @@ const InvoiceDetail = () => {
                   ))}
                 </div>
                 <div>
+                  <div className="text-2xl font-bold lg:hidden mb-2">Deal Progress</div>
                   <div>
                     <div className="h-[10px] w-full bg-white rounded-full">
                       <div
