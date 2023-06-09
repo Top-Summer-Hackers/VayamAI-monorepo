@@ -292,7 +292,7 @@ contract VayamAI is Ownable, ERC721 {
     bool hasFinised = ISmartInvoiceEscrow(_invoice).terminationTime() < block.timestamp;
     uint256[] memory amounts = ISmartInvoiceEscrow(_invoice).getAmounts();
     uint256 milestone = ISmartInvoiceEscrow(_invoice).milestone();
-    if (!hasFinised || amounts.length != milestone) {
+    if (amounts.length != milestone) {
       revert InvoiceHasNotFinished();
     }
   }
