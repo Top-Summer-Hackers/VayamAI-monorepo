@@ -282,14 +282,13 @@ contract VayamAI is Ownable, ERC721 {
     }
   }
 
-  function _checkInvoicesNoReviewCount(address _user) internal {
+  function _checkInvoicesNoReviewCount(address _user) internal view {
     if (invoicesNoReviewCount[_user] > MAX_NUMBER_OF_INVOICES_NO_REVIEW) {
       revert InvoicesWithoutReview(_user);
     }
   }
 
-  function _checkInvoiceCompletion(address _invoice) internal {
-    bool hasFinised = ISmartInvoiceEscrow(_invoice).terminationTime() < block.timestamp;
+  function _checkInvoiceCompletion(address _invoice) internal view {
     uint256[] memory amounts = ISmartInvoiceEscrow(_invoice).getAmounts();
     uint256 milestone = ISmartInvoiceEscrow(_invoice).milestone();
     if (amounts.length != milestone) {
