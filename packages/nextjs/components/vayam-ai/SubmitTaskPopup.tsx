@@ -22,7 +22,7 @@ export default function MyModal({ isOpen, setIsOpen }: MyModalProps) {
     deadline: "",
     description: "",
     skills: "",
-    bounty: 0,
+    bounty: -1,
   });
   const [dateTimeForJob, setDateTimeForJob] = useState<DateValueType>({
     startDate: "",
@@ -154,16 +154,7 @@ export default function MyModal({ isOpen, setIsOpen }: MyModalProps) {
                         className="font-semibold w-full rounded-full border border-primary outline-none bg-transparent text-base px-4 py-2"
                       />
                     </div>
-                    <div className="w-full">
-                      <input
-                        value={taskInformation.description}
-                        onChange={handleOnChange}
-                        type="text"
-                        name="description"
-                        placeholder="Job Description"
-                        className="font-semibold w-full rounded-full border border-primary outline-none bg-transparent text-base px-4 py-2"
-                      />
-                    </div>
+
                     <div className="w-full font-semibold rounded-full border border-primary outline-none bg-transparent text-base px-4 py-2">
                       <Datepicker
                         value={dateTimeForJob}
@@ -186,12 +177,27 @@ export default function MyModal({ isOpen, setIsOpen }: MyModalProps) {
                     </div>
                     <div className="w-full">
                       <input
-                        value={taskInformation.bounty}
+                        value={taskInformation.bounty === -1 ? "" : taskInformation.bounty}
                         onChange={handleOnChange}
                         type="number"
                         name="bounty"
                         placeholder="Bounty Given"
                         className="font-semibold w-full rounded-full border border-primary outline-none bg-transparent text-base px-4 py-2"
+                      />
+                    </div>
+                    <div className="w-full">
+                      <textarea
+                        cols={10}
+                        value={taskInformation.description}
+                        onChange={e =>
+                          setTaskInformation(prev => ({
+                            ...prev,
+                            description: e.target.value,
+                          }))
+                        }
+                        name="description"
+                        placeholder="Job Description"
+                        className="font-semibold w-full rounded-xl border border-primary outline-none bg-transparent text-base px-4 py-2"
                       />
                     </div>
                     {/* submit */}
