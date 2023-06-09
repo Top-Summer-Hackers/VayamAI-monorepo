@@ -31,7 +31,7 @@ const ClientDashboard = () => {
     queryKey: ["jobDetail", address],
     queryFn: () => getAllTasks(),
     onSuccess: data => {
-      const jobs = data.tasks.filter((task: TaskItem) => task.client_id == address);
+      const jobs = data?.tasks.filter((task: TaskItem) => task.client_id == address);
       setClientTasks(jobs);
       if (jobs.length > 0) {
         setCurrentTask(jobs[0]);

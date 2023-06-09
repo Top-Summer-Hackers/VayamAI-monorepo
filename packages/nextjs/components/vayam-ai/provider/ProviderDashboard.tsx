@@ -78,7 +78,7 @@ const ProviderDashboard = () => {
       setItems(lists);
       console.log(lists);
     },
-    enabled: proposals.length > 0,
+    enabled: allProposalsQuery.isSuccess,
   });
 
   return (
@@ -91,9 +91,10 @@ const ProviderDashboard = () => {
       ) : (
         <div>
           <div className="text-3xl font-bold mt-5">Task List (Provider)</div>
-          {proposals.length <= 0 ? (
+          {items.length <= 0 ? (
             <div>
-              <SomethingWentWrong title="No proposal yet" />
+              {" "}
+              <SomethingWentWrong title="No submitted proposal yet" />
             </div>
           ) : (
             <div className="relative mt-5 w-full grid grid-cols-1 lg:grid-cols-2 gap-10">

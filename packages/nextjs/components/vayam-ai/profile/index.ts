@@ -1,3 +1,5 @@
+import ClientProfile from "./ClientProfile";
 import CompletedJob from "./CompletedJob";
+import ProviderProfile from "./ProviderProfile";
 
-export { CompletedJob };
+export { CompletedJob, ProviderProfile, ClientProfile };

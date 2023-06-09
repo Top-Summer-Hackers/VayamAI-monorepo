@@ -35,7 +35,7 @@ export default function MyModal({ refetchProposals, clientId, isOpen, setIsOpen,
   const [currentMilestone, setCurrentMilestone] = useState<Milestone>({
     deadline: "",
     description: "",
-    price: 0,
+    price: -1,
   });
   const [allMilestone, setAllMilestone] = useState<Milestone[]>([]);
 
@@ -184,10 +184,10 @@ export default function MyModal({ refetchProposals, clientId, isOpen, setIsOpen,
                     <div className="w-full">
                       <input
                         onChange={handleOnChange}
-                        type="text"
-                        name="description"
-                        value={currentMilestone.description}
-                        placeholder="Milestone Description"
+                        value={currentMilestone.price <= -1 ? "" : currentMilestone.price}
+                        type="number"
+                        name="price"
+                        placeholder="Price"
                         className="font-semibold w-full rounded-full border border-primary outline-none bg-transparent text-base px-4 py-2"
                       />
                     </div>
@@ -200,14 +200,20 @@ export default function MyModal({ refetchProposals, clientId, isOpen, setIsOpen,
                         minDate={Date()}
                       />
                     </div>
+
                     <div className="w-full">
-                      <input
-                        onChange={handleOnChange}
-                        value={currentMilestone.price}
-                        type="number"
-                        name="price"
-                        placeholder="Price"
-                        className="font-semibold w-full rounded-full border border-primary outline-none bg-transparent text-base px-4 py-2"
+                      <textarea
+                        cols={10}
+                        onChange={e =>
+                          setCurrentMilestone(prev => ({
+                            ...prev,
+                            description: e.target.value,
+                          }))
+                        }
+                        name="description"
+                        value={currentMilestone.description}
+                        placeholder="Milestone Description"
+                        className="font-semibold w-full rounded-xl border border-primary outline-none bg-transparent text-base px-4 py-2"
                       />
                     </div>
                   </div>
