@@ -79,10 +79,10 @@ const ClientProfile = ({ clientAddr }: ClientProfileProps) => {
             <div>
               <img src="/job_detail/avatar.png" alt="" />
             </div>
-            <div className="mt-2 font-bold text-2xl">{user?.user_name}</div>
+            <div className="mt-2 font-bold text-2xl text-center">{user?.user_name}</div>
             <div className="my-5 flex-center gap-1">
               <IoLocationOutline />
-              <div className="text-xs">Kuala Lumpur, Malaysia</div>
+              <div className="text-xs text-center">Kuala Lumpur, Malaysia</div>
             </div>
             <div>{user?.role}</div>
             <div>23 years old</div>

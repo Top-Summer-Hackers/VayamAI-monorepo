@@ -1,5 +1,5 @@
 import { Fragment, useContext, useState } from "react";
-import { registerAsFreelancer } from "../../api/vayam-ai/authentication";
+import { registerAsClient, registerAsFreelancer } from "../../api/vayam-ai/authentication";
 import { Dialog, Transition } from "@headlessui/react";
 import { useMutation } from "@tanstack/react-query";
 import { BigNumber } from "ethers";
@@ -90,7 +90,7 @@ export default function MyModal({ isOpen, setIsOpen }: MyModalProps) {
   });
 
   const registerAsClientMutation = useMutation({
-    mutationFn: registerAsFreelancer,
+    mutationFn: registerAsClient,
     onSuccess: () => {
       setAuthenticationInformation({
         user_name: "",
