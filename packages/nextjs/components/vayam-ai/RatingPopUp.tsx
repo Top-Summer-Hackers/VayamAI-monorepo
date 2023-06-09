@@ -1,11 +1,11 @@
 import { Fragment, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
-import { useMutation } from "@tanstack/react-query";
+// import { useMutation } from "@tanstack/react-query";
 import keccak256 from "keccak256";
 import { toast } from "react-hot-toast";
 import { AiFillStar } from "react-icons/ai";
-import { useAccount } from "wagmi";
-import { submitReview } from "~~/api/vayam-ai/review";
+// import { useAccount } from "wagmi";
+// import { submitReview } from "~~/api/vayam-ai/review";
 import { useScaffoldContractWrite } from "~~/hooks/scaffold-eth";
 
 interface MyModalProps {
@@ -15,8 +15,8 @@ interface MyModalProps {
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export default function MyModal({ taskId, invoiceAddress, isOpen, setIsOpen }: MyModalProps) {
-  const { address } = useAccount();
+export default function MyModal({ /*taskId*/ invoiceAddress, isOpen, setIsOpen }: MyModalProps) {
+  // const { address } = useAccount();
 
   const [rating, setRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
@@ -34,30 +34,32 @@ export default function MyModal({ taskId, invoiceAddress, isOpen, setIsOpen }: M
       number | undefined,
     ],
     onSuccess: () => {
-      registerAsClientMutation.mutate({
-        review: {
-          freelancer_id: address!,
-          id: taskId,
-          review: reviewText,
-          star: rating,
-        },
-      });
+      toast.success("Closed!");
+      closeModal();
+      // registerAsClientMutation.mutate({
+      //   review: {
+      //     freelancer_id: address!,
+      //     id: taskId,
+      //     review: reviewText,
+      //     star: rating,
+      //   },
+      // });
     },
   });
 
   /*************************************************************
    * Backend interaction
    ************************************************************/
-  const registerAsClientMutation = useMutation({
-    mutationFn: submitReview,
-    onSuccess: () => {
-      toast.success("Closed!");
-      closeModal();
-    },
-    onError: (error: any) => {
-      toast.error(error.response.data.message);
-    },
-  });
+  // const registerAsClientMutation = useMutation({
+  //   mutationFn: submitReview,
+  //   onSuccess: () => {
+  //     toast.success("Closed!");
+  //     closeModal();
+  //   },
+  //   onError: (error: any) => {
+  //     toast.error(error.response.data.message);
+  //   },
+  // });
   /*************************************************************
    * Component functions
    ************************************************************/
@@ -155,7 +157,8 @@ export default function MyModal({ taskId, invoiceAddress, isOpen, setIsOpen }: M
                       onClick={handleSubmitClick}
                       className="select-none mt-10 text-base cursor-pointer font-semibold w-full connect-bg rounded-full py-3 text-center"
                     >
-                      {closeDealLoading || registerAsClientMutation.isLoading ? "Loading..." : "Submit"}
+                      {closeDealLoading ? "Loading..." : "Submit"}
+                      {/* {closeDealLoading || registerAsClientMutation.isLoading ? "Loading..." : "Submit"} */}
                     </div>
                   </div>
                 </Dialog.Panel>
