@@ -22,6 +22,7 @@ const JobOngoingDeal = ({ deal, setIsCreateDealPopUp }: JobOngoingDealProps) => 
   const [isRatingOpen, setIsRatingOpen] = useState(false);
   const [isApproved, setIsApproved] = useState(false);
   const [terminationTime, setTerminationTime] = useState("0");
+  const [canCloseDeal, setCanCloseDeal] = useState(false);
 
   /*************************************************************
    * Contract interaction
@@ -50,7 +51,18 @@ const JobOngoingDeal = ({ deal, setIsCreateDealPopUp }: JobOngoingDealProps) => 
     try {
       if (escrowContract) {
         const terminationTime = await escrowContract?.terminationTime();
+        const amounts = await escrowContract?.getAmounts();
+        const milestone = await escrowContract?.milestone();
+
         setTerminationTime(String(terminationTime));
+
+        if (String(milestone) == amounts.length) {
+          // able to close
+          setCanCloseDeal(true);
+        } else {
+          // not able to close
+          setCanCloseDeal(false);
+        }
       }
     } catch (error) {
       // console.log(error);
@@ -82,7 +94,12 @@ const JobOngoingDeal = ({ deal, setIsCreateDealPopUp }: JobOngoingDealProps) => 
   return (
     <div>
       <div className="w-full grid grid-cols-3">
-        <RatingPopUp invoiceAddress={deal.address} isOpen={isRatingOpen} setIsOpen={setIsRatingOpen} />
+        <RatingPopUp
+          taskId={deal.task_id}
+          invoiceAddress={deal.address}
+          isOpen={isRatingOpen}
+          setIsOpen={setIsRatingOpen}
+        />
         <ApprovePopUp
           setIsApproved={setIsApproved}
           amount={deal?.price ?? ""}
@@ -129,13 +146,13 @@ const JobOngoingDeal = ({ deal, setIsCreateDealPopUp }: JobOngoingDealProps) => 
           ) : null}
           {/* show close deal button or deal ongoing word */}
           {(terminationTime != "0" &&
-            parseInt(String(terminationTime)) > Date.now() &&
+            (parseInt(String(terminationTime)) > Date.now() || canCloseDeal) &&
             deal.freelancer_id == address &&
             deal.address != "0x0" &&
             invoice?.isAcknowledged == true &&
             invoice?.isClosedByFreelancer == false) ||
           (terminationTime != "0" &&
-            parseInt(String(terminationTime)) > Date.now() &&
+            (parseInt(String(terminationTime)) > Date.now() || canCloseDeal) &&
             deal.client_id == address &&
             deal.address != "0x0" &&
             invoice?.isAcknowledged == true &&
@@ -150,12 +167,14 @@ const JobOngoingDeal = ({ deal, setIsCreateDealPopUp }: JobOngoingDealProps) => 
 
           {(terminationTime != "0" &&
             parseInt(String(terminationTime)) < Date.now() &&
+            canCloseDeal == false &&
             deal.freelancer_id == address &&
             deal.address != "0x0" &&
             invoice?.isAcknowledged == true &&
             invoice?.isClosedByFreelancer == false) ||
           (terminationTime != "0" &&
             parseInt(String(terminationTime)) < Date.now() &&
+            canCloseDeal == false &&
             deal.client_id == address &&
             deal.address != "0x0" &&
             invoice?.isAcknowledged == true &&
