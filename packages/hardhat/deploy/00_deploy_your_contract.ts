@@ -89,7 +89,10 @@ const deployYourContract: DeployFunction = async function (hre: HardhatRuntimeEn
   await tx.wait();
   tx = await cVayamAI.addTokenToWhitelist(dai.address);
   await tx.wait();
-  // await mintMockTokens(hre, "USDC", "0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc");
+  // KONRAD
+  // console.log("Sending Tokens");
+  // await mintMockTokens(hre, "USDC", "0x76C3038Ef92B1E917d47F67767dA784a027582D4");
+  // await mintMockTokens(hre, "USDC", "0x306744992015C90dEcb014e0836fC50176dE6Cf7");
 };
 
 export default deployYourContract;
