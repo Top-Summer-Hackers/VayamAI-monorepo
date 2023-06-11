@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Loading from "../Loading";
-import CompletedJob from "./CompletedJob";
+// import CompletedJob from "./CompletedJob";
 import { useQuery } from "@tanstack/react-query";
 import { IoLocationOutline } from "react-icons/io5";
 import { getAllFreelancers } from "~~/api/vayam-ai/profile";
@@ -113,9 +113,9 @@ const ProviderProfile = ({ freelancerAddr }: ProviderProfileProps) => {
                 <div className="mt-2">No Completed Job Yet!</div>
               ) : (
                 <div className="mt-3 flex flex-col gap-5">
+                  {/* <CompletedJob />
                   <CompletedJob />
-                  <CompletedJob />
-                  <CompletedJob />
+                  <CompletedJob /> */}
                 </div>
               )}
             </div>

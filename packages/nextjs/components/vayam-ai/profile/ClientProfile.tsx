@@ -3,8 +3,11 @@ import Loading from "../Loading";
 import CompletedJob from "./CompletedJob";
 import { useQuery } from "@tanstack/react-query";
 import { IoLocationOutline } from "react-icons/io5";
+import { useAccount } from "wagmi";
+import { getAllDeals } from "~~/api/vayam-ai/deal";
 import { getAllClients } from "~~/api/vayam-ai/profile";
 import { useScaffoldContractRead } from "~~/hooks/scaffold-eth";
+import { Deal } from "~~/types/vayam-ai/Deals";
 import { User } from "~~/types/vayam-ai/User";
 
 interface ClientProfileProps {
@@ -12,6 +15,8 @@ interface ClientProfileProps {
 }
 
 const ClientProfile = ({ clientAddr }: ClientProfileProps) => {
+  const { address } = useAccount();
+
   const [user, setUser] = useState<User>({
     description: "",
     id: "",
@@ -19,6 +24,7 @@ const ClientProfile = ({ clientAddr }: ClientProfileProps) => {
     tasks_id: [],
     user_name: "",
   });
+  const [deals, setDeals] = useState<Deal[]>([]);
 
   /*************************************************************
    * Contract interaction
@@ -62,10 +68,21 @@ const ClientProfile = ({ clientAddr }: ClientProfileProps) => {
       }
     },
   });
+  const allDealsQuery = useQuery({
+    queryKey: ["dealProfile", address],
+    queryFn: () => getAllDeals(),
+    onSuccess: data => {
+      const deals = data.deals.filter((deal: Deal) => deal.client_id == address);
+      console.log(deals);
+      setDeals(deals);
+    },
+    enabled: address != undefined,
+  });
 
   return (
     <div className="pb-24">
       {allClientsQuery.isLoading ||
+      allDealsQuery.isLoading ||
       invoicesNoReviewCountLoading ||
       closedInvoicesCountLoading ||
       balanceOfLoading ||
@@ -110,13 +127,13 @@ const ClientProfile = ({ clientAddr }: ClientProfileProps) => {
             </div>
             <div className="mt-10">
               <div className="text-2xl font-bold">Completed Jobs</div>
-              {user?.tasks_id && user?.tasks_id?.length <= 0 ? (
+              {deals && deals?.length <= 0 ? (
                 <div className="mt-2">No Completed Job Yet!</div>
               ) : (
                 <div className="mt-3 flex flex-col gap-5">
-                  <CompletedJob />
-                  <CompletedJob />
-                  <CompletedJob />
+                  {deals?.map(deal => (
+                    <CompletedJob key={deal.address} deal={deal} />
+                  ))}
                 </div>
               )}
             </div>

@@ -15,82 +15,82 @@ const deployYourContract: DeployFunction = async function (hre: HardhatRuntimeEn
     with a random private key in the .env file (then used on hardhat.config.ts)
     You can run the `yarn account` command to check your balance in every network.
   */
-  // const { deployer } = await hre.getNamedAccounts();
-  // const { deploy } = hre.deployments;
-  // // deployment objects - UPDATE when deploying to polygon
-  // let weth = { address: "0xc778417E063141139Fce010982780140Aa0cD5Ab" };
-  // let usdc = { address: "0xc778417E063141139Fce010982780140Aa0cD5Ab" };
-  // let dai = { address: "0xc778417E063141139Fce010982780140Aa0cD5Ab" };
-  // if (true) {
-  //   //deploy mock tokens
-  //   weth = await deploy("WETH", {
-  //     from: deployer,
-  //     // Contract constructor arguments
-  //     args: [],
-  //     log: true,
-  //     contract: "MockWETH",
-  //     // autoMine: can be passed to the deploy function to make the deployment process faster on local networks by
-  //     // automatically mining the contract deployment transaction. There is no effect on live networks.
-  //     autoMine: true,
-  //   });
-  //   usdc = await deploy("USDC", {
-  //     from: deployer,
-  //     args: [],
-  //     log: true,
-  //     contract: "MockToken",
-  //     autoMine: true,
-  //   });
-  //   dai = await deploy("DAI", {
-  //     from: deployer,
-  //     args: [],
-  //     log: true,
-  //     contract: "MockToken",
-  //     autoMine: true,
-  //   });
-  //   await mintMockTokens(hre, "USDC", deployer);
-  //   await mintMockTokens(hre, "DAI", deployer);
-  // }
-  // await deploy("Arbitrator", {
-  //   from: deployer,
-  //   args: [hre.ethers.utils.parseEther("0.000001")],
-  //   log: true,
-  //   contract: "MockArbitrator",
-  //   autoMine: false,
-  // });
-  // await deploy("SmartInvoiceFactory", {
-  //   from: deployer,
-  //   args: [weth.address],
-  //   log: true,
-  //   contract: "MockSmartInvoiceFactory",
-  //   autoMine: true,
-  // });
-  // const escrowImplementation = await deploy("EscrowImplementation", {
-  //   from: deployer,
-  //   args: [],
-  //   log: true,
-  //   contract: "MockSmartInvoiceEscrow",
-  //   autoMine: true,
-  // });
-  // const cSmartInvoiceFactory = await hre.ethers.getContract("SmartInvoiceFactory");
-  // let tx = await cSmartInvoiceFactory.addImplementation(
-  //   hre.ethers.utils.keccak256(hre.ethers.utils.toUtf8Bytes("escrow")),
-  //   escrowImplementation.address,
-  // );
-  // await tx.wait();
-  // await deploy("VayamAI", {
-  //   from: deployer,
-  //   args: [weth.address, cSmartInvoiceFactory.address],
-  //   log: true,
-  //   contract: "VayamAI",
-  //   autoMine: true,
-  // });
-  // const cVayamAI = await hre.ethers.getContract("VayamAI");
-  // tx = await cVayamAI.addTokenToWhitelist(usdc.address);
-  // await tx.wait();
-  // tx = await cVayamAI.addTokenToWhitelist(dai.address);
-  // await tx.wait();
+  const { deployer } = await hre.getNamedAccounts();
+  const { deploy } = hre.deployments;
+  // deployment objects - UPDATE when deploying to polygon
+  let weth = { address: "0xc778417E063141139Fce010982780140Aa0cD5Ab" };
+  let usdc = { address: "0xc778417E063141139Fce010982780140Aa0cD5Ab" };
+  let dai = { address: "0xc778417E063141139Fce010982780140Aa0cD5Ab" };
+  if (true) {
+    //deploy mock tokens
+    weth = await deploy("WETH", {
+      from: deployer,
+      // Contract constructor arguments
+      args: [],
+      log: true,
+      contract: "MockWETH",
+      // autoMine: can be passed to the deploy function to make the deployment process faster on local networks by
+      // automatically mining the contract deployment transaction. There is no effect on live networks.
+      autoMine: true,
+    });
+    usdc = await deploy("USDC", {
+      from: deployer,
+      args: [],
+      log: true,
+      contract: "MockToken",
+      autoMine: true,
+    });
+    dai = await deploy("DAI", {
+      from: deployer,
+      args: [],
+      log: true,
+      contract: "MockToken",
+      autoMine: true,
+    });
+    await mintMockTokens(hre, "USDC", deployer);
+    await mintMockTokens(hre, "DAI", deployer);
+  }
+  await deploy("Arbitrator", {
+    from: deployer,
+    args: [hre.ethers.utils.parseEther("0.000001")],
+    log: true,
+    contract: "MockArbitrator",
+    autoMine: false,
+  });
+  await deploy("SmartInvoiceFactory", {
+    from: deployer,
+    args: [weth.address],
+    log: true,
+    contract: "MockSmartInvoiceFactory",
+    autoMine: true,
+  });
+  const escrowImplementation = await deploy("EscrowImplementation", {
+    from: deployer,
+    args: [],
+    log: true,
+    contract: "MockSmartInvoiceEscrow",
+    autoMine: true,
+  });
+  const cSmartInvoiceFactory = await hre.ethers.getContract("SmartInvoiceFactory");
+  let tx = await cSmartInvoiceFactory.addImplementation(
+    hre.ethers.utils.keccak256(hre.ethers.utils.toUtf8Bytes("escrow")),
+    escrowImplementation.address,
+  );
+  await tx.wait();
+  await deploy("VayamAI", {
+    from: deployer,
+    args: [weth.address, cSmartInvoiceFactory.address],
+    log: true,
+    contract: "VayamAI",
+    autoMine: true,
+  });
+  const cVayamAI = await hre.ethers.getContract("VayamAI");
+  tx = await cVayamAI.addTokenToWhitelist(usdc.address);
+  await tx.wait();
+  tx = await cVayamAI.addTokenToWhitelist(dai.address);
+  await tx.wait();
 
-  await mintMockTokens(hre, "USDC", "0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc");
+  await mintMockTokens(hre, "USDC", "0xdF3e18d64BC6A983f673Ab319CCaE4f1a57C7097");
 };
 
 export default deployYourContract;
