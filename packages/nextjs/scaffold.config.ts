@@ -1,4 +1,5 @@
 import * as chains from "wagmi/chains";
+import { Chain } from "wagmi/chains";
 
 export type ScaffoldConfig = {
   targetNetwork: chains.Chain;
@@ -11,9 +12,31 @@ export type ScaffoldConfig = {
   walletAutoConnect: boolean;
 };
 
+const mantleTestnet: Chain = {
+  id: 5001,
+  name: "mantleTestnet",
+  network: "mantleTestnet",
+  iconBackground: "#fff",
+  nativeCurrency: {
+    decimals: 18,
+    name: "BIT Token",
+    symbol: "BIT",
+  },
+  rpcUrls: {
+    default: {
+      http: ["https://rpc.testnet.mantle.xyz"],
+    },
+  },
+  blockExplorers: {
+    default: { name: "Explorer", url: "https://explorer.testnet.mantle.xyz/" },
+    etherscan: { name: "Explorer", url: "https://explorer.testnet.mantle.xyz/" },
+  },
+  testnet: true,
+};
+
 const scaffoldConfig = {
   // The network where your DApp lives in
-  targetNetwork: chains.hardhat,
+  targetNetwork: mantleTestnet,
 
   // The interval at which your front-end polls the RPC servers for new data
   // it has no effect on the local network
