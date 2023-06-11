@@ -6,6 +6,18 @@ const mintMockTokens = async (hre: HardhatRuntimeEnvironment, contractName: any,
   const tx = await cToken.mint(user, hre.ethers.utils.parseEther("1000000"));
   await tx.wait();
 };
+
+const sendETH = async (hre: HardhatRuntimeEnvironment, fromUser: any, user: any, amountStr: string) => {
+  const sFromUser = await hre.ethers.getSigner(fromUser);
+  console.log("Sending ETH from %s to %s", fromUser, user);
+  const tx = await sFromUser.sendTransaction({
+    to: user,
+    value: hre.ethers.utils.parseEther(amountStr),
+  });
+  await tx.wait();
+  console.log("New balance of %s : ", user, hre.ethers.utils.formatEther(await hre.ethers.provider.getBalance(user)));
+};
+
 const deployYourContract: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   /*
     On localhost, the deployer account is the one that comes with Hardhat, which is already funded.
@@ -89,10 +101,14 @@ const deployYourContract: DeployFunction = async function (hre: HardhatRuntimeEn
   await tx.wait();
   tx = await cVayamAI.addTokenToWhitelist(dai.address);
   await tx.wait();
+
   // KONRAD
   // console.log("Sending Tokens");
   // await mintMockTokens(hre, "USDC", "0x76C3038Ef92B1E917d47F67767dA784a027582D4");
   // await mintMockTokens(hre, "USDC", "0x306744992015C90dEcb014e0836fC50176dE6Cf7");
+
+  // await sendETH(hre, deployer, "0x76C3038Ef92B1E917d47F67767dA784a027582D4", "100");
+  // await sendETH(hre, deployer, "0x306744992015C90dEcb014e0836fC50176dE6Cf7", "100");
 };
 
 export default deployYourContract;
