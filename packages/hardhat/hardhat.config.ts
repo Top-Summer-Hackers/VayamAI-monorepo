@@ -80,6 +80,10 @@ const config: HardhatUserConfig = {
       url: `https://capable-still-replica.matic-testnet.discover.quiknode.pro/b6e56b8931cb53eb1c575e1ed22ed871f8270b4e/`,
       accounts: [deployerPrivateKey],
     },
+    mantleTestnet: {
+      url: `https://rpc.testnet.mantle.xyz`,
+      accounts: [deployerPrivateKey],
+    },
   },
   verify: {
     etherscan: {
