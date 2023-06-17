@@ -31,7 +31,7 @@ export default function MyModal({ setIsApproved, invoiceAddr, tokenAddr, amount,
       BigNumber | undefined,
     ],
     onSuccess: () => {
-      toast.success("Acknowledged!");
+      toast.success("Approved!");
       setIsApproved(true);
       setIsOpen(false);
     },
@@ -44,7 +44,7 @@ export default function MyModal({ setIsApproved, invoiceAddr, tokenAddr, amount,
       BigNumber | undefined,
     ],
     onSuccess: () => {
-      toast.success("Acknowledged!");
+      toast.success("Approved!");
       setIsApproved(true);
       setIsOpen(false);
     },
