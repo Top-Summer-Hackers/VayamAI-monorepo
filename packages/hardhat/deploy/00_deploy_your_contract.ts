@@ -59,8 +59,8 @@ const deployYourContract: DeployFunction = async function (hre: HardhatRuntimeEn
       contract: "MockToken",
       autoMine: true,
     });
-    await mintMockTokens(hre, "USDC", deployer);
-    await mintMockTokens(hre, "DAI", deployer);
+    // await mintMockTokens(hre, "USDC", deployer);
+    // await mintMockTokens(hre, "DAI", deployer);
   }
   await deploy("Arbitrator", {
     from: deployer,
