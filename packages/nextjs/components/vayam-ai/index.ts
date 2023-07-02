@@ -6,6 +6,7 @@ import Navbar from "./Navbar";
 import PleaseConnectWallet from "./PleaseConnectWallet";
 import RatingPopUp from "./RatingPopUp";
 import RegisterPopUp from "./RegisterPopUp";
+import SubmitMilestoneLink from "./SubmitMilestoneLink";
 import SubmitProposalPopUp from "./SubmitProposalPopUp";
 import SubmitTaskPopup from "./SubmitTaskPopup";
 import TopUpPopUp from "./TopUpPopUp";
@@ -22,4 +23,5 @@ export {
   SubmitProposalPopUp,
   ApprovePopUp,
   TopUpPopUp,
+  SubmitMilestoneLink,
 };

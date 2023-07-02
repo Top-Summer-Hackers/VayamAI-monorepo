@@ -40,6 +40,8 @@ const JobProposal = ({
     mutationFn: approveProposal,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["jobProposal"] });
+      queryClient.invalidateQueries({ queryKey: ["ProviderDashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["ClientDashboard"] });
       toast.success("Approved proposal!");
       refetchProposals();
     },

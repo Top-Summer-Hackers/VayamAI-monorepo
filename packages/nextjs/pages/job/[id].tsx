@@ -54,6 +54,7 @@ const JobDetail = () => {
    * Backend interaction
    ************************************************************/
   const allTasksQuery = useQuery({
+    refetchOnMount: true,
     queryKey: ["jobDetail", id],
     queryFn: () => getAllTasks(),
     onSuccess: data => {
@@ -62,7 +63,8 @@ const JobDetail = () => {
     },
   });
   const allProposalsQuery = useQuery({
-    queryKey: ["jobProposal", id],
+    refetchOnMount: true,
+    queryKey: ["JobDetail", "jobProposal", id],
     queryFn: () => getAllProposals(),
     onSuccess: data => {
       const proposals = data.proposals.filter((proposal: ProposalItem) => proposal.task_id == id);
@@ -77,16 +79,17 @@ const JobDetail = () => {
     },
   });
   const proposalDetailQuery = useQuery({
-    queryKey: ["proposalDetailQuery", selectedProposal],
+    refetchOnMount: true,
+    queryKey: ["JobDetail", "proposalDetailQuery", selectedProposal],
     enabled: allProposalsQuery.isSuccess && selectedProposal != "-1",
-    staleTime: Infinity,
     queryFn: () => getProposal(selectedProposal),
     onSuccess: data => {
       setMilestones(data.data.detailed_proposal.milestones);
     },
   });
   const allDealsQuery = useQuery({
-    queryKey: ["allDeals", id],
+    refetchOnMount: true,
+    queryKey: ["JobDetail", "allDeals", id],
     queryFn: () => getAllDeals(),
     onSuccess: data => {
       const deals = data.deals.filter((deal: Deal) => deal.task_id == id);

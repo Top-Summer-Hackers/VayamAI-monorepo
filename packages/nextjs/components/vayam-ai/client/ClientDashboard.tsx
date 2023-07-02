@@ -28,7 +28,8 @@ const ClientDashboard = () => {
    * Backend interaction
    ************************************************************/
   const allTasksQuery = useQuery({
-    queryKey: ["jobDetail", address],
+    queryKey: ["ClientDashboard", "jobDetail", address],
+    staleTime: Infinity,
     queryFn: () => getAllTasks(),
     onSuccess: data => {
       const jobs = data?.tasks.filter((task: TaskItem) => task.client_id == address);

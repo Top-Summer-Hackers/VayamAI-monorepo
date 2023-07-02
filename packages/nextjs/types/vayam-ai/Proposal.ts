@@ -9,6 +9,8 @@ export type Milestone = {
   description: string;
   price: number;
   deadline: string;
+  id: string;
+  link: string;
 };
 
 export type SunmitProposal = {

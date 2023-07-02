@@ -50,15 +50,19 @@ const ProviderDashboard = () => {
    * Backend interaction
    ************************************************************/
   const allProposalsQuery = useQuery({
-    queryKey: ["providerProposal", address],
+    refetchOnMount: true,
+    queryKey: ["ProviderDashboard", "providerProposal", address],
     queryFn: () => getAllProposals(),
     onSuccess: data => {
       const proposals = data.proposals.filter((proposal: Proposal) => proposal.freelancer_id == address);
       setProposals(proposals);
+      allTasksQuery.refetch();
     },
   });
   const allTasksQuery = useQuery({
-    queryKey: ["jobDetail", address],
+    refetchOnMount: true,
+    enabled: allProposalsQuery.isSuccess,
+    queryKey: ["ProviderDashboard", "jobDetail", address],
     queryFn: () => getAllTasks(),
     onSuccess: data => {
       const lists: {
@@ -77,13 +81,15 @@ const ProviderDashboard = () => {
       }
       setItems(lists);
     },
-    enabled: allProposalsQuery.isSuccess,
   });
 
   return (
     <div className="px-5">
       {/* job title */}
-      {allProposalsQuery.isLoading || allTasksQuery.isLoading ? (
+      {allProposalsQuery.isLoading ||
+      allTasksQuery.isLoading ||
+      allProposalsQuery.isRefetching ||
+      allTasksQuery.isRefetching ? (
         <div className="w-fit mx-auto mt-10">
           <Loading />
         </div>

@@ -51,7 +51,8 @@ const TaskPreview = ({ currentTask }: TaskPreviewProps) => {
    * Backend interaction
    ************************************************************/
   const allDealsQuery = useQuery({
-    queryKey: ["clientTaskPreviewDeal", currentTask.id],
+    queryKey: ["ClientDashboard", "clientTaskPreviewDeal", currentTask.id],
+    staleTime: Infinity,
     queryFn: () => getAllDeals(),
     onSuccess: data => {
       const dealRes = data.deals.find((deal: Deal) => deal.task_id == currentTask.id);
@@ -59,7 +60,8 @@ const TaskPreview = ({ currentTask }: TaskPreviewProps) => {
     },
   });
   const allProposalsQuery = useQuery({
-    queryKey: ["previewProposal", currentTask.id],
+    queryKey: ["ClientDashboard", "previewProposal", currentTask.id],
+    staleTime: Infinity,
     queryFn: () => getAllProposals(),
     onSuccess: data => {
       const res = data?.proposals.find((proposal: Proposal) => proposal.id == deal?.proposal_id);
@@ -70,9 +72,9 @@ const TaskPreview = ({ currentTask }: TaskPreviewProps) => {
     enabled: allDealsQuery.isSuccess,
   });
   const proposalDetailQuery = useQuery({
-    queryKey: ["proposalDetailClientDashboardQuery", proposal?.id],
     enabled: allProposalsQuery.isSuccess,
     staleTime: Infinity,
+    queryKey: ["ClientDashboard", "proposalDetailClientDashboardQuery", proposal?.id],
     queryFn: () => getProposal(proposal?.id || ""),
     onSuccess: data => {
       setMilestones(data.data.detailed_proposal.milestones);

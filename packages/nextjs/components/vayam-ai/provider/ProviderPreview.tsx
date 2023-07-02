@@ -54,17 +54,18 @@ const ProviderPreview = ({ item }: TaskPreviewProps) => {
    * Backend interaction
    ************************************************************/
   const allDealsQuery = useQuery({
+    refetchOnMount: true,
     queryKey: ["providerTaskPreviewDeal", item.proposal.id],
     queryFn: () => getAllDeals(),
     onSuccess: data => {
       const dealRes = data.deals.find((deal: Deal) => deal.task_id == item.task.id);
       setDeal(dealRes);
+      proposalDetailQuery.refetch();
     },
   });
   const proposalDetailQuery = useQuery({
+    enabled: allDealsQuery.isSuccess && deal != undefined,
     queryKey: ["proposalDetailProviderDashboardQuery", deal?.proposal_id],
-    enabled: allDealsQuery.isSuccess,
-    staleTime: Infinity,
     queryFn: () => getProposal(deal?.proposal_id || ""),
     onSuccess: data => {
       setMilestones(data.data.detailed_proposal.milestones);

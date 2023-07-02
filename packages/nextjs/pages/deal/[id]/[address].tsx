@@ -4,12 +4,13 @@ import { escrow, token } from "../../../constant/abi.json";
 import { useQuery } from "@tanstack/react-query";
 import { ethers } from "ethers";
 import { toast } from "react-hot-toast";
+import { AiOutlineLink } from "react-icons/ai";
 import { IoIosAdd } from "react-icons/io";
 import truncateEthAddress from "truncate-eth-address";
 import { useAccount, useContract, useProvider, useSigner } from "wagmi";
 import { getAllDeals } from "~~/api/vayam-ai/deal";
 import { getAllProposals, getProposal } from "~~/api/vayam-ai/proposal";
-import { Loading, TopUpPopUp } from "~~/components/vayam-ai";
+import { Loading, SubmitMilestoneLink, TopUpPopUp } from "~~/components/vayam-ai";
 import VayamAIContext from "~~/context/context";
 import { useDeployedContractInfo, useScaffoldContractRead } from "~~/hooks/scaffold-eth";
 import { Deal } from "~~/types/vayam-ai/Deals";
@@ -18,7 +19,7 @@ import { Milestone, Proposal, ProposalItem } from "~~/types/vayam-ai/Proposal";
 const InvoiceDetail = () => {
   const router = useRouter();
   const { address: walletAddress } = useAccount();
-  const { userType, clientKeccak256 } = useContext(VayamAIContext);
+  const { userType, clientKeccak256, freelancerKeccak256 } = useContext(VayamAIContext);
   const { data: signer } = useSigner();
   const provider = useProvider();
 
@@ -36,19 +37,25 @@ const InvoiceDetail = () => {
   });
   const [proposal, setProposal] = useState<Proposal>();
   const [milestones, setMilestones] = useState<Milestone[]>([]);
+  const [milestoneAmounts, setMilestoneAmounts] = useState([]);
   const [isTopUpOpen, setIsTopUpOpen] = useState(false);
+  const [isSubmitLinkOpen, setIsSubmitLinkOpen] = useState(false);
+  const [isFetchingData, setIsFetchingData] = useState(false);
   const [currentMileStone, setCurrentMilestone] = useState(0);
   const [numberOfReleased, setNumberOfReleased] = useState(0);
-  const [milestoneAmounts, setMilestoneAmounts] = useState([]);
-  const [isFetchingData, setIsFetchingData] = useState(false);
   const [tokenContractAddr, setTokenContractAddr] = useState("");
   const [invoiceBalance, setInvoiceBalance] = useState("-1");
+  const [submitLinkDetail, setSubmitLinkDetail] = useState({
+    milestoneId: "",
+    proposalId: "",
+  });
 
   /*************************************************************
    * Backend interaction
    ************************************************************/
   const dealQuery = useQuery({
-    queryKey: ["deal", id],
+    refetchOnMount: true,
+    queryKey: ["DealDetail", "deal", id],
     queryFn: () => getAllDeals(),
     onSuccess: data => {
       const res = data.deals.find((deal: Deal) => deal.id == id);
@@ -56,7 +63,8 @@ const InvoiceDetail = () => {
     },
   });
   const proposalQuery = useQuery({
-    queryKey: ["jobProposal", id],
+    refetchOnMount: true,
+    queryKey: ["DealDetail", "jobProposal", id],
     queryFn: () => getAllProposals(),
     onSuccess: data => {
       const proposal = data.proposals.find((proposal: ProposalItem) => proposal.id == deal.proposal_id);
@@ -65,11 +73,12 @@ const InvoiceDetail = () => {
     enabled: deal?.id != "-1",
   });
   const proposalDetailQuery = useQuery({
-    queryKey: ["proposalDetailDealPageQuery", proposal?.id],
+    refetchOnMount: true,
+    queryKey: ["DealDetail", "proposalDetailDealPageQuery", proposal?.id],
     enabled: proposalQuery.isSuccess,
-    staleTime: Infinity,
     queryFn: () => getProposal(proposal?.id || ""),
     onSuccess: data => {
+      console.log(data);
       setMilestones(data.data.detailed_proposal.milestones);
     },
   });
@@ -135,6 +144,11 @@ const InvoiceDetail = () => {
     releaseMilestone(index);
   }
 
+  // Invoke when freelancer whant to submit proof of work link file
+  function handleSubmitMilestoneLink() {
+    setIsSubmitLinkOpen(true);
+  }
+
   useEffect(() => {
     getInvoiceDetails();
   }, [tokenContractAddr, walletAddress, escrowContract]);
@@ -157,6 +171,11 @@ const InvoiceDetail = () => {
             InvoiceAddr={(address as string) || ""}
             isOpen={isTopUpOpen}
             setIsOpen={setIsTopUpOpen}
+          />
+          <SubmitMilestoneLink
+            submitLinkDetail={submitLinkDetail}
+            isOpen={isSubmitLinkOpen}
+            setIsOpen={setIsSubmitLinkOpen}
           />
           <div className="flex justify-between items-center">
             <div className="text-3xl font-bold mt-5">
@@ -244,7 +263,26 @@ const InvoiceDetail = () => {
                     >
                       <div className="flex justify-between items-center">
                         <div>
-                          <div className="font-semibold">{milestone.description}</div>
+                          <div className="font-semibold flex">
+                            {milestone.description}{" "}
+                            {milestone.link != "" &&
+                            (deal.client_id == walletAddress || deal.freelancer_id == walletAddress) ? (
+                              <a
+                                href={`${milestone.link.slice(0, milestone.link.indexOf(":") + 1)}${milestone.link
+                                  .slice(milestone.link.indexOf(":") + 1)
+                                  .replaceAll(":", "/")}`}
+                                target="_blank"
+                                className="cursor-pointer ml-1 flex items-center gap-1"
+                                rel="noreferrer"
+                              >
+                                (&nbsp;Work Submitted{" "}
+                                <div>
+                                  <AiOutlineLink className="text-xl mt-0.5" />
+                                </div>
+                                )
+                              </a>
+                            ) : null}
+                          </div>
                           <div>Deadline: {milestone.deadline}</div>
                           <div>Price: {milestone.price}</div>
                         </div>
@@ -261,6 +299,28 @@ const InvoiceDetail = () => {
                             Release
                           </div>
                         ) : null}
+                        {userType != undefined &&
+                        userType == freelancerKeccak256 &&
+                        invoice?.freelancer == walletAddress &&
+                        invoice?.isAcknowledged &&
+                        currentMileStone &&
+                        milestone.link == "" &&
+                        parseInt(String(currentMileStone)) == index ? (
+                          <div
+                            onClick={() => {
+                              handleSubmitMilestoneLink();
+                              setSubmitLinkDetail({ milestoneId: milestone.id, proposalId: proposal!.id! });
+                            }}
+                            className="cursor-pointer connect-bg rounded-full px-3 py-1"
+                          >
+                            Submit
+                          </div>
+                        ) : null}
+                        {parseInt(String(numberOfReleased)) <= index &&
+                          milestone.link != "" &&
+                          deal.freelancer_id == walletAddress && (
+                            <div className="text-green-300 px-3 py-1">Submitted</div>
+                          )}
                         {numberOfReleased && parseInt(String(numberOfReleased)) > index && (
                           <div className="text-green-300 px-3 py-1">Released</div>
                         )}
