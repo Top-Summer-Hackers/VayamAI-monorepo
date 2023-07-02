@@ -27,7 +27,7 @@ const ProviderDashboard = () => {
     proposal: {
       client_id: "",
       freelancer_id: "",
-      milestones: [],
+      milestones_id: [],
       task_id: "",
       accepted: false,
       price: 0,
@@ -76,7 +76,6 @@ const ProviderDashboard = () => {
         setCurrentItem(lists[0]);
       }
       setItems(lists);
-      console.log(lists);
     },
     enabled: allProposalsQuery.isSuccess,
   });

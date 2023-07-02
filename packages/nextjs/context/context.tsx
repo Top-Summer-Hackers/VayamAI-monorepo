@@ -24,8 +24,8 @@ const VayamAIContext = createContext<VayamAIContextData>({
   userType: undefined,
   userTypeLoading: false,
   userIdRefetch: (options?: { throwOnError: boolean; cancelRefetch: boolean } | undefined): Promise<BigNumber> => {
-    console.log(options);
     // This is an empty function with no implementation
+    console.log("USELESS: " + JSON.stringify(options));
     return Promise.resolve(new BigNumber("", "")); // Returning a placeholder value
   },
   clientKeccak256: "",

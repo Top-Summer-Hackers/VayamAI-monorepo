@@ -6,7 +6,8 @@ import { toast } from "react-hot-toast";
 import Datepicker from "react-tailwindcss-datepicker";
 import { DateValueType } from "react-tailwindcss-datepicker/dist/types";
 import { useAccount, useMutation } from "wagmi";
-import { submitProposal } from "~~/api/vayam-ai/milestone";
+import { submitMilestones, submitProposal } from "~~/api/vayam-ai/milestone";
+import { SubmitMilestone } from "~~/types/vayam-ai/Proposal";
 import { formatDate } from "~~/utils/vayam-ai/convertDate";
 
 type Milestone = {
@@ -37,13 +38,13 @@ export default function MyModal({ refetchProposals, clientId, isOpen, setIsOpen,
     description: "",
     price: -1,
   });
-  const [allMilestone, setAllMilestone] = useState<Milestone[]>([]);
+  const [allMilestone, setAllMilestone] = useState<SubmitMilestone[]>([]);
 
   /*************************************************************
    * Backend interaction
    ************************************************************/
-  const submitProposalMutation = useMutation({
-    mutationFn: submitProposal,
+  const submitMilestoneMutation = useMutation({
+    mutationFn: submitMilestones,
     onSuccess: () => {
       toast.success("Submitted a new Proposal!");
       setAllMilestone([]);
@@ -58,6 +59,26 @@ export default function MyModal({ refetchProposals, clientId, isOpen, setIsOpen,
       });
       setIsOpen(false);
       refetchProposals();
+    },
+    onError: (error: any) => {
+      toast.error(error.response.data.message);
+    },
+  });
+
+  const submitProposalMutation = useMutation({
+    mutationFn: submitProposal,
+    onSuccess: data => {
+      const populatedMilestones = allMilestone.map(milestone => {
+        return {
+          proposal_id: data.data.proposal.id,
+          description: milestone.description,
+          price: milestone.price,
+          deadline: milestone.deadline,
+        };
+      });
+      submitMilestoneMutation.mutate({
+        miltstone: populatedMilestones,
+      });
     },
     onError: (error: any) => {
       toast.error(error.response.data.message);
@@ -97,7 +118,6 @@ export default function MyModal({ refetchProposals, clientId, isOpen, setIsOpen,
   };
 
   function handleAddMilestone() {
-    console.log(currentMilestone);
     if (
       currentMilestone.deadline.trim() === "" ||
       currentMilestone.description.trim() === ""
@@ -111,6 +131,7 @@ export default function MyModal({ refetchProposals, clientId, isOpen, setIsOpen,
       setAllMilestone(prev => [
         ...prev,
         {
+          proposal_id: "",
           deadline: currentMilestone.deadline,
           description: currentMilestone.description,
           price: parseFloat(String(currentMilestone.price)),
@@ -129,17 +150,11 @@ export default function MyModal({ refetchProposals, clientId, isOpen, setIsOpen,
     if (allMilestone.length <= 0 || address === undefined) {
       toast.error("Please add at least one milestone and make sure you connected with your wallet!");
     } else {
-      console.log({
-        task_id: id,
-        freelancer_id: address!,
-        milestones: allMilestone,
-      });
       submitProposalMutation.mutate({
         proposal: {
           client_id: clientId,
           task_id: id,
           freelancer_id: address!,
-          milestones: allMilestone,
         },
       });
     }
@@ -217,7 +232,7 @@ export default function MyModal({ refetchProposals, clientId, isOpen, setIsOpen,
                       />
                     </div>
                   </div>
-                  {submitProposalMutation.isLoading ? (
+                  {submitProposalMutation.isLoading || submitMilestoneMutation.isLoading ? (
                     <div className="mx-auto mt-5 w-fit">
                       <Loading />
                     </div>

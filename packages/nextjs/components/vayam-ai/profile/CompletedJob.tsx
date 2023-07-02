@@ -18,7 +18,6 @@ const CompletedJob = ({ deal }: CompletedJob) => {
     queryFn: () => getAllTasks(),
     onSuccess: data => {
       const jobDetail = data.tasks.find((task: TaskItem) => task.id == deal.task_id);
-      console.log(jobDetail);
       setJobDetail(jobDetail);
     },
   });

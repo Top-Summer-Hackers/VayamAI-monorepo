@@ -11,9 +11,10 @@ import { Deal } from "~~/types/vayam-ai/Deals";
 interface JobOngoingDealProps {
   deal: Deal;
   setIsCreateDealPopUp: React.Dispatch<React.SetStateAction<boolean>>;
+  setCurrentDeal: React.Dispatch<React.SetStateAction<Deal>>;
 }
 
-const JobOngoingDeal = ({ deal, setIsCreateDealPopUp }: JobOngoingDealProps) => {
+const JobOngoingDeal = ({ deal, setIsCreateDealPopUp, setCurrentDeal }: JobOngoingDealProps) => {
   const { address } = useAccount();
   const { data: signer } = useSigner();
   const provider = useProvider();
@@ -85,8 +86,6 @@ const JobOngoingDeal = ({ deal, setIsCreateDealPopUp }: JobOngoingDealProps) => 
     setIsRatingOpen(true);
   }
 
-  console.log("DEBUGGing", invoice);
-
   useEffect(() => {
     getInvoiceDetails();
   }, [address, escrowContract]);
@@ -95,8 +94,10 @@ const JobOngoingDeal = ({ deal, setIsCreateDealPopUp }: JobOngoingDealProps) => 
     <div>
       <div className="w-full grid grid-cols-3">
         <RatingPopUp
-          taskId={deal.task_id}
+          taskId={deal.id}
           invoiceAddress={deal.address}
+          freelancer_id={deal.freelancer_id}
+          client_id={deal.client_id}
           isOpen={isRatingOpen}
           setIsOpen={setIsRatingOpen}
         />
@@ -123,6 +124,7 @@ const JobOngoingDeal = ({ deal, setIsCreateDealPopUp }: JobOngoingDealProps) => 
             <div
               onClick={() => {
                 setIsCreateDealPopUp(true);
+                setCurrentDeal(deal);
               }}
               className="mt-1 cursor-pointer flex flex-col justify-center w-fit rounded-full px-5 h-fit font-semibold py-1 connect-bg"
             >

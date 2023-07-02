@@ -33,7 +33,11 @@ const ProviderProfile = ({ freelancerAddr }: ProviderProfileProps) => {
     args: [freelancerAddr] as readonly [string | undefined],
     enabled: freelancerAddr != undefined,
   });
-  const { data: closedInvoicesCount, isLoading: closedInvoicesCountLoading } = useScaffoldContractRead({
+  const {
+    data: closedInvoicesCount,
+    isLoading: closedInvoicesCountLoading,
+    isSuccess: closedInvoicesCountSuccess,
+  } = useScaffoldContractRead({
     contractName: "VayamAI",
     functionName: "closedInvoicesCount",
     args: [freelancerAddr] as readonly [string | undefined],
@@ -66,14 +70,14 @@ const ProviderProfile = ({ freelancerAddr }: ProviderProfileProps) => {
     },
   });
   const allDealsQuery = useQuery({
+    enabled: freelancerAddr != undefined && closedInvoicesCountSuccess,
     queryKey: ["dealProfileProvider", freelancerAddr],
     queryFn: () => getAllDeals(),
     onSuccess: data => {
       const deals = data.deals.filter((deal: Deal) => deal.freelancer_id == freelancerAddr);
-      console.log(deals);
-      setDeals(deals);
+      const completedDeals = deals.splice(0, Number(closedInvoicesCount?.toString()));
+      setDeals(completedDeals);
     },
-    enabled: freelancerAddr != undefined,
   });
 
   return (

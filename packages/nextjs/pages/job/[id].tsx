@@ -1,22 +1,23 @@
 import React, { useContext, useState } from "react";
 import { useRouter } from "next/router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { IoMdAdd } from "react-icons/io";
 import { getAllDeals } from "~~/api/vayam-ai/deal";
-import { getAllProposals } from "~~/api/vayam-ai/proposal";
+import { getAllProposals, getProposal } from "~~/api/vayam-ai/proposal";
 import { getAllTasks } from "~~/api/vayam-ai/tasks";
 import { CreateDealPopUp, Loading, SubmitProposalPopUp } from "~~/components/vayam-ai";
 import SomethingWentWrong from "~~/components/vayam-ai/SomethingWentWrong";
-import { JobOngoingDeal, JobProposal } from "~~/components/vayam-ai/job";
+import { JobMilestoneList, JobOngoingDeal, JobProposal } from "~~/components/vayam-ai/job";
 import VayamAIContext from "~~/context/context";
 import { Deal } from "~~/types/vayam-ai/Deals";
-import { ProposalItem } from "~~/types/vayam-ai/Proposal";
+import { Milestone, ProposalItem } from "~~/types/vayam-ai/Proposal";
 import { TaskItem } from "~~/types/vayam-ai/Task";
 
 const JobDetail = () => {
   const router = useRouter();
 
   const { userType, freelancerKeccak256 } = useContext(VayamAIContext);
+  const queryClient = useQueryClient();
 
   const { id } = router.query;
 
@@ -33,6 +34,7 @@ const JobDetail = () => {
     title: "",
   });
   const [proposals, setProposals] = useState<ProposalItem[]>([]);
+  const [milestones, setMilestones] = useState<Milestone[]>([]);
   const [deals, setDeals] = useState<Deal[]>([]);
   const [currentDeal, setCurrentDeal] = useState<Deal>({
     address: "",
@@ -44,9 +46,9 @@ const JobDetail = () => {
     status: "",
     task_id: "",
   });
-  const [selectedProposal, setSelectedProposal] = useState(0);
-  const [isHadAcceptedProposal, setIsHadAcceptedProposal] = useState(false);
+  const [selectedProposal, setSelectedProposal] = useState("-1");
   const [isCreateDealPopUp, setIsCreateDealPopUp] = useState(false);
+  const [isHadAcceptedProposal, setIsHadAcceptedProposal] = useState(false);
 
   /*************************************************************
    * Backend interaction
@@ -56,7 +58,6 @@ const JobDetail = () => {
     queryFn: () => getAllTasks(),
     onSuccess: data => {
       const jobDetail = data.tasks.find((task: TaskItem) => task.id == id);
-      console.log(jobDetail);
       setTaskDetail(jobDetail);
     },
   });
@@ -68,7 +69,20 @@ const JobDetail = () => {
       const isAccepted = proposals.find((proposal: ProposalItem) => proposal.accepted == true);
       setProposals(proposals);
       setIsHadAcceptedProposal(isAccepted);
-      // console.log(proposals);
+      if (proposals.length > 0) {
+        console.log(proposals);
+        // queryClient.invalidateQueries({ queryKey: ["proposalDetailQuery"] });
+        setSelectedProposal(proposals[0].id);
+      }
+    },
+  });
+  const proposalDetailQuery = useQuery({
+    queryKey: ["proposalDetailQuery", selectedProposal],
+    enabled: allProposalsQuery.isSuccess && selectedProposal != "-1",
+    staleTime: Infinity,
+    queryFn: () => getProposal(selectedProposal),
+    onSuccess: data => {
+      setMilestones(data.data.detailed_proposal.milestones);
     },
   });
   const allDealsQuery = useQuery({
@@ -77,7 +91,6 @@ const JobDetail = () => {
     onSuccess: data => {
       const deals = data.deals.filter((deal: Deal) => deal.task_id == id);
       setDeals(deals);
-      console.log(data);
     },
   });
 
@@ -94,6 +107,7 @@ const JobDetail = () => {
         isOpen={isCreateDealPopUp}
         setIsOpen={setIsCreateDealPopUp}
         dealsRefetch={allDealsQuery.refetch}
+        milestones={milestones}
       />
       {allTasksQuery.isLoading || allProposalsQuery.isLoading || allDealsQuery.isLoading ? (
         <div className="w-fit mx-auto mt-10">
@@ -146,26 +160,26 @@ const JobDetail = () => {
           <div className="mt-10 grid grid-cols-1 lg:grid-cols-2 gap-5">
             <div>
               <h3 className="text-xl font-semibold">Milestone List</h3>
-              <div className="flex flex-col gap-3">
-                {proposals[selectedProposal]?.milestones.map((milestone, index) => (
-                  <div key={milestone.description + index} className="border-l-2 pl-3 border-sideColor">
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <div className="font-semibold">{milestone.description}</div>
-                        <div>Deadline: {milestone.deadline}</div>
-                        <div>Price: {milestone.price}</div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              {(proposalDetailQuery.isLoading || proposalDetailQuery.isRefetching) && selectedProposal != "-1" ? (
+                <Loading />
+              ) : (
+                <div>
+                  <JobMilestoneList milestones={milestones} />
+                </div>
+              )}
             </div>
             <div>
               <div>
                 <h3 className="text-xl font-semibold">Submitted Proposal</h3>
                 <div className="flex flex-col gap-2">
-                  {proposals.map((proposal, index) => (
-                    <div key={proposal.id} onClick={() => setSelectedProposal(index)}>
+                  {proposals.map(proposal => (
+                    <div
+                      key={proposal.id}
+                      onClick={() => {
+                        queryClient.invalidateQueries({ queryKey: ["proposalDetailQuery"] });
+                        setSelectedProposal(proposal.id);
+                      }}
+                    >
                       <JobProposal
                         refetchProposals={allProposalsQuery.refetch}
                         proposal={proposal}
@@ -174,7 +188,7 @@ const JobDetail = () => {
                         freelancerAddr={proposal.freelancer_id}
                         clientAddr={proposal.client_id}
                         accepted={proposal.accepted}
-                        price={proposal.price}
+                        price={proposal.proposal_price}
                       />
                     </div>
                   ))}
@@ -184,8 +198,12 @@ const JobDetail = () => {
                 <h3 className="text-xl font-semibold">Ongoing Deal</h3>
                 <div className="flex flex-col gap-2">
                   {deals.map(deal => (
-                    <div key={deal.id} onClick={() => setCurrentDeal(deal)}>
-                      <JobOngoingDeal deal={deal} setIsCreateDealPopUp={setIsCreateDealPopUp} />
+                    <div key={deal.id} /*onClick={() => setCurrentDeal(deal)}*/>
+                      <JobOngoingDeal
+                        deal={deal}
+                        setIsCreateDealPopUp={setIsCreateDealPopUp}
+                        setCurrentDeal={setCurrentDeal}
+                      />
                     </div>
                   ))}
                 </div>

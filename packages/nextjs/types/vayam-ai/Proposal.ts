@@ -1,7 +1,20 @@
+export type SubmitMilestone = {
+  proposal_id: string;
+  description: string;
+  price: number;
+  deadline: string;
+};
+
 export type Milestone = {
   description: string;
   price: number;
   deadline: string;
+};
+
+export type SunmitProposal = {
+  client_id: string;
+  task_id: string;
+  freelancer_id: string;
 };
 
 export type Proposal = {
@@ -9,7 +22,7 @@ export type Proposal = {
   client_id: string;
   task_id: string;
   freelancer_id: string;
-  milestones: Milestone[];
+  milestones_id: Milestone[];
   price?: number;
   id?: string;
 };
@@ -27,6 +40,6 @@ export type ProposalItem = {
   client_id: string;
   freelancer_id: string;
   task_id: string;
-  price: number;
+  proposal_price: number;
   milestones: Milestone[];
 };

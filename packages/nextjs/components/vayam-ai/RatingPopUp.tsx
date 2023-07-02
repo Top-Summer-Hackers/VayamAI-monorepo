@@ -4,20 +4,19 @@ import { useMutation } from "@tanstack/react-query";
 import keccak256 from "keccak256";
 import { toast } from "react-hot-toast";
 import { AiFillStar } from "react-icons/ai";
-import { useAccount } from "wagmi";
 import { submitReview } from "~~/api/vayam-ai/review";
 import { useScaffoldContractWrite } from "~~/hooks/scaffold-eth";
 
 interface MyModalProps {
+  freelancer_id: string;
+  client_id: string;
   isOpen: boolean;
   invoiceAddress: string;
   taskId: string;
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export default function MyModal({ taskId, invoiceAddress, isOpen, setIsOpen }: MyModalProps) {
-  const { address } = useAccount();
-
+export default function MyModal({ freelancer_id, client_id, taskId, invoiceAddress, isOpen, setIsOpen }: MyModalProps) {
   const [rating, setRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
   const [reviewText, setReviewText] = useState("");
@@ -34,12 +33,13 @@ export default function MyModal({ taskId, invoiceAddress, isOpen, setIsOpen }: M
       number | undefined,
     ],
     onSuccess: () => {
-      registerAsClientMutation.mutate({
+      submitReviewtMutation.mutate({
         review: {
-          freelancer_id: address!,
-          id: taskId,
+          freelancer_id: freelancer_id,
+          client_id: client_id,
+          deal_id: taskId,
           review: reviewText,
-          star: rating,
+          stars: rating,
         },
       });
     },
@@ -48,7 +48,7 @@ export default function MyModal({ taskId, invoiceAddress, isOpen, setIsOpen }: M
   /*************************************************************
    * Backend interaction
    ************************************************************/
-  const registerAsClientMutation = useMutation({
+  const submitReviewtMutation = useMutation({
     mutationFn: submitReview,
     onSuccess: () => {
       toast.success("Closed!");
@@ -77,7 +77,6 @@ export default function MyModal({ taskId, invoiceAddress, isOpen, setIsOpen }: M
 
   const handleClick = (index: number) => {
     setRating(index + 1);
-    console.log("Rating saved:", index + 1);
   };
 
   function handleSubmitClick() {
@@ -156,7 +155,7 @@ export default function MyModal({ taskId, invoiceAddress, isOpen, setIsOpen }: M
                       className="select-none mt-10 text-base cursor-pointer font-semibold w-full connect-bg rounded-full py-3 text-center"
                     >
                       {/* {closeDealLoading ? "Loading..." : "Submit"} */}
-                      {closeDealLoading || registerAsClientMutation.isLoading ? "Loading..." : "Submit"}
+                      {closeDealLoading || submitReviewtMutation.isLoading ? "Loading..." : "Submit"}
                     </div>
                   </div>
                 </Dialog.Panel>

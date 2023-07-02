@@ -13,7 +13,6 @@ const Jobs = () => {
     queryKey: ["allTasks"],
     queryFn: () => getAllTasks(),
   });
-  console.log(allTasksQuery.data);
 
   return (
     <div className="pb-20">

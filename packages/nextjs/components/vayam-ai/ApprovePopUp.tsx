@@ -21,8 +21,6 @@ export default function MyModal({ setIsApproved, invoiceAddr, tokenAddr, amount,
   const { data: USDCContract } = useDeployedContractInfo("USDC");
   const { data: VayamAIContract } = useDeployedContractInfo("VayamAI");
 
-  console.log("DEBUGGING:", amount);
-
   const { writeAsync: approveUSDC } = useScaffoldContractWrite({
     contractName: "USDC",
     functionName: "approve",

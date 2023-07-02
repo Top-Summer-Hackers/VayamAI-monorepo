@@ -7,10 +7,10 @@ import { ethers } from "ethers";
 import { toast } from "react-hot-toast";
 import { useAccount, useContract, useProvider, useSigner } from "wagmi";
 import { getAllDeals } from "~~/api/vayam-ai/deal";
-import { getAllProposals } from "~~/api/vayam-ai/proposal";
+import { getAllProposals, getProposal } from "~~/api/vayam-ai/proposal";
 import { useDeployedContractInfo } from "~~/hooks/scaffold-eth";
 import { Deal } from "~~/types/vayam-ai/Deals";
-import { Proposal } from "~~/types/vayam-ai/Proposal";
+import { Milestone, Proposal } from "~~/types/vayam-ai/Proposal";
 import { TaskItem } from "~~/types/vayam-ai/Task";
 
 interface TaskPreviewProps {
@@ -24,6 +24,7 @@ const TaskPreview = ({ currentTask }: TaskPreviewProps) => {
 
   const [deal, setDeal] = useState<Deal>();
   const [proposal, setProposal] = useState<Proposal>();
+  const [milestones, setMilestones] = useState<Milestone[]>([]);
   const [numberOfReleased, setNumberOfReleased] = useState(0);
   const [milestoneAmounts, setMilestoneAmounts] = useState([]);
   const [tokenContractAddr, setTokenContractAddr] = useState("");
@@ -68,6 +69,15 @@ const TaskPreview = ({ currentTask }: TaskPreviewProps) => {
     },
     enabled: allDealsQuery.isSuccess,
   });
+  const proposalDetailQuery = useQuery({
+    queryKey: ["proposalDetailClientDashboardQuery", proposal?.id],
+    enabled: allProposalsQuery.isSuccess,
+    staleTime: Infinity,
+    queryFn: () => getProposal(proposal?.id || ""),
+    onSuccess: data => {
+      setMilestones(data.data.detailed_proposal.milestones);
+    },
+  });
 
   async function getInvoiceDetails() {
     setIsFetchingData(true);
@@ -95,7 +105,7 @@ const TaskPreview = ({ currentTask }: TaskPreviewProps) => {
 
   return (
     <div>
-      {allDealsQuery.isLoading || isFetchingData || allProposalsQuery.isLoading ? (
+      {allDealsQuery.isLoading || isFetchingData || allProposalsQuery.isLoading || proposalDetailQuery.isLoading ? (
         <div className="w-fit mx-auto mt-5">
           <Loading />
         </div>
@@ -163,7 +173,7 @@ const TaskPreview = ({ currentTask }: TaskPreviewProps) => {
               </div>
               {proposal != undefined && proposal.accepted == true /* milestones */ ? (
                 <div className="mt-3 flex flex-col gap-3">
-                  {proposal.milestones.map((milestone, index) => (
+                  {milestones.map((milestone, index) => (
                     <div
                       key={milestone.description + milestone.deadline + milestone.price + index}
                       className="grid grid-cols-4 items-center"

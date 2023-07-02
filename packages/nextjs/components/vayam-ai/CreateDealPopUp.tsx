@@ -7,20 +7,29 @@ import keccak256 from "keccak256";
 import { toast } from "react-hot-toast";
 import { updateDeal } from "~~/api/vayam-ai/deal";
 import { useDeployedContractInfo, useScaffoldContractWrite, useScaffoldEventSubscriber } from "~~/hooks/scaffold-eth";
-import { ProposalItem } from "~~/types/vayam-ai/Proposal";
+import { Milestone, ProposalItem } from "~~/types/vayam-ai/Proposal";
 
 interface MyModalProps {
   isOpen: boolean;
-  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
   clientAddr: string;
   proposal: ProposalItem | undefined;
   dealId: string;
+  milestones: Milestone[];
+  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
   dealsRefetch: <TPageData>(
     options?: (RefetchOptions & RefetchQueryFilters<TPageData>) | undefined,
   ) => Promise<QueryObserverResult<any, unknown>>;
 }
 
-export default function MyModal({ dealId, proposal, clientAddr, isOpen, setIsOpen, dealsRefetch }: MyModalProps) {
+export default function MyModal({
+  milestones,
+  dealId,
+  // proposal,
+  clientAddr,
+  isOpen,
+  setIsOpen,
+  dealsRefetch,
+}: MyModalProps) {
   const [selectedCurrency, setSelectedCurrency] = useState("usdc");
   const [duration, setDuration] = useState(0);
 
@@ -34,8 +43,7 @@ export default function MyModal({ dealId, proposal, clientAddr, isOpen, setIsOpe
     contractName: "SmartInvoiceFactory",
     eventName: "LogNewInvoice",
     listener: (index, address, amounts, type, version) => {
-      console.log(amounts, type, version);
-      console.log(index, address);
+      console.log(`USELESS:`, index, amounts, type, version);
       updateInvoiceAddrMutation.mutate({
         dealId: dealId,
         invoiceAddr: address,
@@ -51,9 +59,7 @@ export default function MyModal({ dealId, proposal, clientAddr, isOpen, setIsOpe
       selectedCurrency == "usdc" ? USDCContract?.address : DAIContract?.address,
       (duration * 24 * 60 * 60) as unknown as BigNumber,
       ("0x" + keccak256(``).toString("hex")) as `0x${string}`,
-      proposal?.milestones.map(
-        milestone => ethers.utils.parseEther(milestone.price.toString()) as unknown as BigNumber,
-      ),
+      milestones.map(milestone => ethers.utils.parseEther(milestone.price.toString()) as unknown as BigNumber),
     ] as readonly [
       string | undefined,
       string | undefined,
@@ -62,9 +68,7 @@ export default function MyModal({ dealId, proposal, clientAddr, isOpen, setIsOpe
       readonly BigNumber[] | undefined,
     ],
     onSuccess: async data => {
-      console.log(data);
-      const result = await data.wait();
-      console.log(result);
+      await data.wait();
       setIsOpen(false);
       dealsRefetch();
     },
@@ -190,7 +194,7 @@ export default function MyModal({ dealId, proposal, clientAddr, isOpen, setIsOpe
                         Amount
                       </label>
                       <div className="font-semibold w-full rounded-lg border border-primary outline-none bg-transparent text-base px-4 py-2">
-                        {proposal?.milestones.map((milestone, index) => (
+                        {milestones.map((milestone, index) => (
                           <div key={milestone.description + index} className="flex items-center gap-2">
                             <div>{index + 1}.</div>
                             <div>

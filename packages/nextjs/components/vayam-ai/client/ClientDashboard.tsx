@@ -36,7 +36,6 @@ const ClientDashboard = () => {
       if (jobs.length > 0) {
         setCurrentTask(jobs[0]);
       }
-      console.log(jobs);
     },
   });
 

@@ -2,10 +2,11 @@ import api from ".";
 
 export function submitReview(data: {
   review: {
-    id: string;
+    deal_id: string;
     freelancer_id: string;
+    client_id: string;
     review: string;
-    star: number;
+    stars: number;
   };
 }) {
   return api.post("/review", data.review).then(response => response.data);

@@ -145,7 +145,6 @@ const getParsedEthersError = (e: any): string => {
     message = e.message;
   }
 
-  console.log("Attempt to clean up:", message);
   try {
     const obj = JSON.parse(message);
     if (obj && obj.body) {

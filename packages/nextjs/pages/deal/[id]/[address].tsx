@@ -8,12 +8,12 @@ import { IoIosAdd } from "react-icons/io";
 import truncateEthAddress from "truncate-eth-address";
 import { useAccount, useContract, useProvider, useSigner } from "wagmi";
 import { getAllDeals } from "~~/api/vayam-ai/deal";
-import { getAllProposals } from "~~/api/vayam-ai/proposal";
+import { getAllProposals, getProposal } from "~~/api/vayam-ai/proposal";
 import { Loading, TopUpPopUp } from "~~/components/vayam-ai";
 import VayamAIContext from "~~/context/context";
 import { useDeployedContractInfo, useScaffoldContractRead } from "~~/hooks/scaffold-eth";
 import { Deal } from "~~/types/vayam-ai/Deals";
-import { Proposal, ProposalItem } from "~~/types/vayam-ai/Proposal";
+import { Milestone, Proposal, ProposalItem } from "~~/types/vayam-ai/Proposal";
 
 const InvoiceDetail = () => {
   const router = useRouter();
@@ -35,6 +35,7 @@ const InvoiceDetail = () => {
     task_id: "",
   });
   const [proposal, setProposal] = useState<Proposal>();
+  const [milestones, setMilestones] = useState<Milestone[]>([]);
   const [isTopUpOpen, setIsTopUpOpen] = useState(false);
   const [currentMileStone, setCurrentMilestone] = useState(0);
   const [numberOfReleased, setNumberOfReleased] = useState(0);
@@ -63,6 +64,15 @@ const InvoiceDetail = () => {
     },
     enabled: deal?.id != "-1",
   });
+  const proposalDetailQuery = useQuery({
+    queryKey: ["proposalDetailDealPageQuery", proposal?.id],
+    enabled: proposalQuery.isSuccess,
+    staleTime: Infinity,
+    queryFn: () => getProposal(proposal?.id || ""),
+    onSuccess: data => {
+      setMilestones(data.data.detailed_proposal.milestones);
+    },
+  });
 
   /*************************************************************
    * Contract interaction
@@ -82,7 +92,6 @@ const InvoiceDetail = () => {
   });
 
   async function getInvoiceDetails() {
-    console.log("CALL:getInvoiceDetails");
     setIsFetchingData(true);
     try {
       const amounts = await escrowContract?.getAmounts();
@@ -108,7 +117,6 @@ const InvoiceDetail = () => {
       await getInvoiceDetails();
       toast.success("Released Milestone!");
     } catch (error) {
-      console.log(error);
       toast.error("Release milestone failed!");
     }
   }
@@ -133,7 +141,11 @@ const InvoiceDetail = () => {
 
   return (
     <div>
-      {getInvoiceLoading || dealQuery.isLoading || proposalQuery.isLoading || isFetchingData ? (
+      {getInvoiceLoading ||
+      dealQuery.isLoading ||
+      proposalQuery.isLoading ||
+      isFetchingData ||
+      proposalDetailQuery.isLoading ? (
         <div className="w-fit mx-auto mt-10">
           <Loading />
         </div>
@@ -225,7 +237,7 @@ const InvoiceDetail = () => {
               <div className="text-2xl font-bold lg:hidden mb-2">Milestones</div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
                 <div className="mt-3 flex flex-col gap-5">
-                  {proposal?.milestones.map((milestone, index) => (
+                  {milestones.map((milestone, index) => (
                     <div
                       key={milestone.deadline + index + milestone.description}
                       className="border-l-2 pl-3 border-sideColor"

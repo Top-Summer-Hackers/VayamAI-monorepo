@@ -24,7 +24,6 @@ const Navbar = () => {
       openConnectModal();
     }
   }
-  console.log("Navbar", userId);
 
   return (
     <div className="max-w-[1980px] mx-auto mb-10 pt-5 flex items-center justify-between">

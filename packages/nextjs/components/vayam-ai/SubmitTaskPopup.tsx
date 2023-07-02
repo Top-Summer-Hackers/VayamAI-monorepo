@@ -60,7 +60,6 @@ export default function MyModal({ isOpen, setIsOpen }: MyModalProps) {
    * Component functions
    ************************************************************/
   const handleDateChange = (newValue: DateValueType) => {
-    console.log("newValue:", newValue);
     setDateTimeForJob(newValue);
   };
 
@@ -100,7 +99,6 @@ export default function MyModal({ isOpen, setIsOpen }: MyModalProps) {
           client_id: address,
         };
         submitNewTaskMutation.mutate({ taskInfo: submitData });
-        console.log(submitData);
       } catch (error) {
         toast.error("Please ensure that you have all the information in correct format!");
       }

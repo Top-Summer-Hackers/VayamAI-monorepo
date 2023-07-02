@@ -6,9 +6,10 @@ import { ethers } from "ethers";
 import { toast } from "react-hot-toast";
 import { useAccount, useContract, useProvider, useSigner } from "wagmi";
 import { getAllDeals } from "~~/api/vayam-ai/deal";
+import { getProposal } from "~~/api/vayam-ai/proposal";
 import { useDeployedContractInfo } from "~~/hooks/scaffold-eth";
 import { Deal } from "~~/types/vayam-ai/Deals";
-import { Proposal } from "~~/types/vayam-ai/Proposal";
+import { Milestone, Proposal } from "~~/types/vayam-ai/Proposal";
 import { TaskItem } from "~~/types/vayam-ai/Task";
 
 interface TaskPreviewProps {
@@ -25,6 +26,7 @@ const ProviderPreview = ({ item }: TaskPreviewProps) => {
   const provider = useProvider();
 
   const [deal, setDeal] = useState<Deal>();
+  const [milestones, setMilestones] = useState<Milestone[]>([]);
   const [numberOfReleased, setNumberOfReleased] = useState(0);
   const [milestoneAmounts, setMilestoneAmounts] = useState([]);
   const [isFetchingData, setIsFetchingData] = useState(false);
@@ -59,6 +61,15 @@ const ProviderPreview = ({ item }: TaskPreviewProps) => {
       setDeal(dealRes);
     },
   });
+  const proposalDetailQuery = useQuery({
+    queryKey: ["proposalDetailProviderDashboardQuery", deal?.proposal_id],
+    enabled: allDealsQuery.isSuccess,
+    staleTime: Infinity,
+    queryFn: () => getProposal(deal?.proposal_id || ""),
+    onSuccess: data => {
+      setMilestones(data.data.detailed_proposal.milestones);
+    },
+  });
 
   async function getInvoiceDetails() {
     setIsFetchingData(true);
@@ -69,7 +80,6 @@ const ProviderPreview = ({ item }: TaskPreviewProps) => {
       setMilestoneAmounts(amounts);
       setNumberOfReleased(milestone);
       setTokenContractAddr(token);
-      console.log(`${item.proposal.id}-${milestone}`);
 
       if (deal?.address) {
         const invoiceBalance = await tokenContract?.balanceOf(deal?.address);
@@ -87,7 +97,7 @@ const ProviderPreview = ({ item }: TaskPreviewProps) => {
 
   return (
     <div>
-      {allDealsQuery.isLoading || isFetchingData ? (
+      {allDealsQuery.isLoading || proposalDetailQuery.isLoading || isFetchingData ? (
         <div className="w-fit mx-auto mt-5">
           <Loading />
         </div>
@@ -165,7 +175,7 @@ const ProviderPreview = ({ item }: TaskPreviewProps) => {
             <div className="mt-5 text-2xl font-semibold">Proposed Milestones</div>
             <div></div>
             <div className="mt-3 flex flex-col gap-3">
-              {item.proposal.milestones.map((proposal, index) => (
+              {milestones.map((proposal, index) => (
                 <div key={proposal.description} className="grid grid-cols-4 items-center">
                   <div>{proposal.description}</div>
                   <div className="text-sideColor">${proposal.price}</div>

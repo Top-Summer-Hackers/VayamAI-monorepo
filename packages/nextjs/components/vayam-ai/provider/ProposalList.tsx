@@ -11,7 +11,7 @@ const ProposalList = ({ proposal }: ProposalListProp) => {
       <div className="flex justify-between items-center">
         <div>
           <div className="cursor-pointer text-xl font-bold">Total Price: {proposal.price}</div>
-          <div className="font-semibold">Number of milestones: {proposal.milestones.length}</div>
+          <div className="font-semibold">Number of milestones: {proposal.milestones_id.length}</div>
         </div>
       </div>
       {/* description */}

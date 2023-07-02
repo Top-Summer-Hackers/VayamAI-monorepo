@@ -18,8 +18,6 @@ const Search = () => {
     queryFn: () => getTaskBySkills(String(keyword) != undefined ? String(keyword) : ""),
   });
 
-  console.log(jobSearchBySkillQuery.data);
-
   return (
     <div>
       <div className="text-3xl font-bold mt-5">Recommended Result</div>

@@ -31,7 +31,7 @@ const ProviderTaskList = ({ item }: ProviderTaskListTaskListProps) => {
       </div>
       {/* description */}
       <div className="mt-2 max-w-[80%] text-sm">{item.task?.description}</div>
-      <div>{item.proposal.milestones.length} milestones</div>
+      <div>{item.proposal.milestones_id.length} milestones</div>
     </div>
   );
 };
