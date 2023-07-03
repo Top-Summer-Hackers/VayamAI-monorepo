@@ -63,6 +63,7 @@ const InvoiceDetail = () => {
     },
   });
   const proposalQuery = useQuery({
+    enabled: deal?.id != "-1",
     refetchOnMount: true,
     queryKey: ["DealDetail", "jobProposal", id],
     queryFn: () => getAllProposals(),
@@ -70,7 +71,6 @@ const InvoiceDetail = () => {
       const proposal = data.proposals.find((proposal: ProposalItem) => proposal.id == deal.proposal_id);
       setProposal(proposal);
     },
-    enabled: deal?.id != "-1",
   });
   const proposalDetailQuery = useQuery({
     refetchOnMount: true,

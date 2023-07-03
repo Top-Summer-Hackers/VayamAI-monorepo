@@ -1,5 +1,5 @@
 import { Fragment, useContext, useState } from "react";
-import { registerAsClient, registerAsFreelancer } from "../../api/vayam-ai/authentication";
+import { login, registerAsClient, registerAsFreelancer } from "../../api/vayam-ai/authentication";
 import { Dialog, Transition } from "@headlessui/react";
 import { useMutation } from "@tanstack/react-query";
 import { BigNumber } from "ethers";
@@ -12,13 +12,14 @@ import { RegisterAsProvider } from "~~/types/vayam-ai/RegisterAsProvider";
 
 interface MyModalProps {
   isOpen: boolean;
+  isLogin: boolean;
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export default function MyModal({ isOpen, setIsOpen }: MyModalProps) {
+export default function MyModal({ isOpen, isLogin, setIsOpen }: MyModalProps) {
   const { address } = useAccount();
 
-  const { userIdRefetch } = useContext(VayamAIContext);
+  const { userIdRefetch, setAuthenticationCredentials } = useContext(VayamAIContext);
 
   const [selectedRole, setSelectedRole] = useState("freelancer");
   const [authenticationInformation, setAuthenticationInformation] = useState<RegisterAsProvider>({
@@ -107,11 +108,36 @@ export default function MyModal({ isOpen, setIsOpen }: MyModalProps) {
     },
   });
 
+  const loginMutation = useMutation({
+    mutationFn: login,
+    onSuccess: data => {
+      setAuthenticationCredentials(data.data.user);
+      setIsOpen(false);
+      toast.success("Log in successfully!");
+      setAuthenticationInformation({
+        user_name: "",
+        password: "",
+        description: "",
+        _id: "",
+      });
+      console.log(data);
+    },
+    onError: (error: any) => {
+      toast.error(error.response.data.message);
+    },
+  });
+
   /*************************************************************
    * Component functions
    ************************************************************/
   function closeModal() {
     setIsOpen(false);
+    setAuthenticationInformation({
+      user_name: "",
+      password: "",
+      description: "",
+      _id: "",
+    });
   }
 
   function handleOnChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -123,19 +149,31 @@ export default function MyModal({ isOpen, setIsOpen }: MyModalProps) {
 
   // when user click on the register/login button
   function handleAuthentication() {
-    if (
-      authenticationInformation.user_name.trim() === "" ||
-      authenticationInformation.password.trim() === "" ||
-      authenticationInformation.description.trim() === "" ||
-      address === undefined
-    ) {
-      return toast.error("Please fill in all the information and connect your wallet!");
+    if (isLogin) {
+      if (
+        authenticationInformation.user_name.trim() === "" ||
+        authenticationInformation.password.trim() === "" ||
+        address === undefined
+      ) {
+        return toast.error("Please provide valid login credentials!");
+      }
+    } else {
+      if (
+        authenticationInformation.user_name.trim() === "" ||
+        authenticationInformation.password.trim() === "" ||
+        authenticationInformation.description.trim() === "" ||
+        address === undefined
+      ) {
+        return toast.error("Please fill in all the information and connect your wallet!");
+      }
     }
 
-    if (selectedRole === "freelancer") {
-      // provider (aka freelancer)
-      // TODO: submit a new provider
-      registerAsUser();
+    if (isLogin) {
+      loginMutation.mutate({
+        password: authenticationInformation.password,
+        role: selectedRole,
+        user_name: authenticationInformation.user_name,
+      });
     } else {
       // client
       registerAsUser();
@@ -211,16 +249,18 @@ export default function MyModal({ isOpen, setIsOpen }: MyModalProps) {
                         className="font-semibold w-full rounded-full border border-primary outline-none bg-transparent text-base px-4 py-2"
                       />
                     </div>
-                    <div className="mt-5 w-full">
-                      <input
-                        value={authenticationInformation.description}
-                        onChange={handleOnChange}
-                        type="description"
-                        name="description"
-                        placeholder="Role (Auditor etc.)"
-                        className="font-semibold w-full rounded-full border border-primary outline-none bg-transparent text-base px-4 py-2"
-                      />
-                    </div>
+                    {!isLogin && (
+                      <div className="mt-5 w-full">
+                        <input
+                          value={authenticationInformation.description}
+                          onChange={handleOnChange}
+                          type="description"
+                          name="description"
+                          placeholder="Role (Auditor etc.)"
+                          className="font-semibold w-full rounded-full border border-primary outline-none bg-transparent text-base px-4 py-2"
+                        />
+                      </div>
+                    )}
                     {/* password */}
                     <div className="mt-5 w-full">
                       <input
@@ -239,6 +279,7 @@ export default function MyModal({ isOpen, setIsOpen }: MyModalProps) {
                     >
                       {registerAsClientMutation.isLoading ||
                       registerAsFreelancerMutation.isLoading ||
+                      loginMutation.isLoading ||
                       registerAsUserLoading
                         ? "Loading..."
                         : "Login / Register"}

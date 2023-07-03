@@ -13,11 +13,12 @@ const Navbar = () => {
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
   const [isSubmitTaskOpen, setIsSubmitTaskOpen] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState("");
+  const [isLogin, setIsLogin] = useState(false);
 
   const { isConnected: isWalletConnected, address } = useAccount();
   const { openConnectModal } = useConnectModal();
 
-  const { userId, userType, clientKeccak256 } = useContext(VayamAIContext);
+  const { userId, userType, clientKeccak256, authenticationCredentials } = useContext(VayamAIContext);
 
   async function connectWallet() {
     if (!isWalletConnected && openConnectModal) {
@@ -27,7 +28,7 @@ const Navbar = () => {
 
   return (
     <div className="max-w-[1980px] mx-auto mb-10 pt-5 flex items-center justify-between">
-      <RegisterPopUp isOpen={isRegisterOpen} setIsOpen={setIsRegisterOpen} />
+      <RegisterPopUp isOpen={isRegisterOpen} setIsOpen={setIsRegisterOpen} isLogin={isLogin} />
       <SubmitTaskPopup isOpen={isSubmitTaskOpen} setIsOpen={setIsSubmitTaskOpen} />
       {/* logo/app name */}
       <Link href={"/"}>
@@ -71,35 +72,60 @@ const Navbar = () => {
         <div className="flex-center gap-5">
           {address !== undefined ? (
             <div className="flex items-center gap-5">
-              {userType != undefined && userType === clientKeccak256 && (
-                <div onClick={() => setIsSubmitTaskOpen(true)} className="font-semibold cursor-pointer">
-                  + add job
-                </div>
-              )}
+              {userType != undefined &&
+                userType === clientKeccak256 &&
+                authenticationCredentials.id != "" &&
+                authenticationCredentials.user_name != "" && (
+                  <div onClick={() => setIsSubmitTaskOpen(true)} className="font-semibold cursor-pointer">
+                    + add job
+                  </div>
+                )}
               <Link href={"/jobs"}>
                 {" "}
                 <div className="font-semibold cursor-pointer">jobs</div>
               </Link>
-              {userId != undefined && parseInt(String(userId).toString()) > 0 ? (
+              {userId != undefined && parseInt(String(userId).toString()) <= 0 ? (
+                <div
+                  onClick={() => {
+                    setIsLogin(false);
+                    setIsRegisterOpen(true);
+                  }}
+                  className="cursor-pointer border-2 border-primary px-8 py-1 rounded-full font-semibold"
+                >
+                  Register
+                </div>
+              ) : null}
+              {userId != undefined &&
+              parseInt(String(userId).toString()) > 0 &&
+              authenticationCredentials.id == "" &&
+              authenticationCredentials.user_name == "" ? (
+                <div
+                  onClick={() => {
+                    setIsLogin(true);
+                    setIsRegisterOpen(true);
+                  }}
+                  className="cursor-pointer border-2 border-primary px-8 py-1 rounded-full font-semibold"
+                >
+                  Login
+                </div>
+              ) : null}
+              {userId != undefined &&
+              parseInt(String(userId).toString()) > 0 &&
+              authenticationCredentials.id != "" &&
+              authenticationCredentials.user_name != "" ? (
                 <Link href={"/dashboard"}>
                   {" "}
                   <div className="font-semibold cursor-pointer">dashboard</div>
                 </Link>
               ) : null}
-              {userId != undefined && parseInt(String(userId).toString()) > 0 ? (
+              {userId != undefined &&
+              parseInt(String(userId).toString()) > 0 &&
+              authenticationCredentials.id != "" &&
+              authenticationCredentials.user_name != "" ? (
                 <Link href={"/profile"}>
                   {" "}
                   <div className="font-semibold cursor-pointer">profile</div>
                 </Link>
-              ) : null}
-
-              {userId != undefined && parseInt(String(userId).toString()) <= 0 ? (
-                <div
-                  onClick={() => setIsRegisterOpen(true)}
-                  className="cursor-pointer border-2 border-primary px-8 py-1 rounded-full font-semibold"
-                >
-                  Register
-                </div>
               ) : null}
             </div>
           ) : (

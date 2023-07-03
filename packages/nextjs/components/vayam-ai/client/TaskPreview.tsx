@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from "react";
-import Link from "next/link";
 import { escrow, token } from "../../../constant/abi.json";
 import Loading from "../Loading";
 import { useQuery } from "@tanstack/react-query";
 import { ethers } from "ethers";
-import { toast } from "react-hot-toast";
 import { useAccount, useContract, useProvider, useSigner } from "wagmi";
 import { getAllDeals } from "~~/api/vayam-ai/deal";
 import { getAllProposals, getProposal } from "~~/api/vayam-ai/proposal";
@@ -51,8 +49,8 @@ const TaskPreview = ({ currentTask }: TaskPreviewProps) => {
    * Backend interaction
    ************************************************************/
   const allDealsQuery = useQuery({
+    refetchOnMount: true,
     queryKey: ["ClientDashboard", "clientTaskPreviewDeal", currentTask.id],
-    staleTime: Infinity,
     queryFn: () => getAllDeals(),
     onSuccess: data => {
       const dealRes = data.deals.find((deal: Deal) => deal.task_id == currentTask.id);
@@ -60,8 +58,9 @@ const TaskPreview = ({ currentTask }: TaskPreviewProps) => {
     },
   });
   const allProposalsQuery = useQuery({
+    enabled: allDealsQuery.isSuccess,
+    refetchOnMount: true,
     queryKey: ["ClientDashboard", "previewProposal", currentTask.id],
-    staleTime: Infinity,
     queryFn: () => getAllProposals(),
     onSuccess: data => {
       const res = data?.proposals.find((proposal: Proposal) => proposal.id == deal?.proposal_id);
@@ -69,11 +68,10 @@ const TaskPreview = ({ currentTask }: TaskPreviewProps) => {
         setProposal(res);
       }
     },
-    enabled: allDealsQuery.isSuccess,
   });
   const proposalDetailQuery = useQuery({
     enabled: allProposalsQuery.isSuccess,
-    staleTime: Infinity,
+    refetchOnMount: true,
     queryKey: ["ClientDashboard", "proposalDetailClientDashboardQuery", proposal?.id],
     queryFn: () => getProposal(proposal?.id || ""),
     onSuccess: data => {
@@ -96,7 +94,7 @@ const TaskPreview = ({ currentTask }: TaskPreviewProps) => {
         setInvoiceBalance(invoiceBalance);
       }
     } catch (error) {
-      toast.error("Get invoice details failed!");
+      // toast.error("Get invoice details failed!");
     }
     setIsFetchingData(false);
   }
@@ -186,12 +184,13 @@ const TaskPreview = ({ currentTask }: TaskPreviewProps) => {
                         {index < numberOfReleased ? (
                           <div className="text-green-300 col-span-2 text-center w-fit px-7 py-1">Released</div>
                         ) : (
-                          <Link
-                            href={`/deal/${deal?.id}/${deal?.address}`}
-                            className="col-span-2 cursor-pointer text-center rounded-lg w-fit px-7 py-1 border border-primary"
-                          >
-                            View
-                          </Link>
+                          <></>
+                          // <Link
+                          //   href={`/deal/${deal?.id}/${deal?.address}`}
+                          //   className="col-span-2 cursor-pointer text-center rounded-lg w-fit px-7 py-1 border border-primary"
+                          // >
+                          //   View
+                          // </Link>
                         )}
                         {/* <div className="cursor-pointer connect-bg text-center rounded-lg w-fit px-7 py-1">Confirm</div> */}
                       </div>

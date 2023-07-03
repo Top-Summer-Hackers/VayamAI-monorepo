@@ -4,3 +4,9 @@ export type RegisterAsProvider = {
   description: string;
   password: string;
 };
+
+export type LoginCredential = {
+  user_name: string;
+  password: string;
+  role: string;
+};

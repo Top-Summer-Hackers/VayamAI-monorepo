@@ -56,6 +56,7 @@ export default function MyModal({ freelancer_id, client_id, taskId, invoiceAddre
     },
     onError: (error: any) => {
       toast.error(error.response.data.message);
+      closeModal();
     },
   });
   /*************************************************************

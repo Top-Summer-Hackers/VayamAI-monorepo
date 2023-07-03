@@ -3,7 +3,6 @@ import { escrow, token } from "../../../constant/abi.json";
 import Loading from "../Loading";
 import { useQuery } from "@tanstack/react-query";
 import { ethers } from "ethers";
-import { toast } from "react-hot-toast";
 import { useAccount, useContract, useProvider, useSigner } from "wagmi";
 import { getAllDeals } from "~~/api/vayam-ai/deal";
 import { getProposal } from "~~/api/vayam-ai/proposal";
@@ -87,7 +86,7 @@ const ProviderPreview = ({ item }: TaskPreviewProps) => {
         setInvoiceBalance(invoiceBalance);
       }
     } catch (error) {
-      toast.error("Get invoice details failed!");
+      // toast.error("Get invoice details failed!");
     }
     setIsFetchingData(false);
   }
@@ -180,14 +179,21 @@ const ProviderPreview = ({ item }: TaskPreviewProps) => {
                 <div key={proposal.description} className="grid grid-cols-4 items-center">
                   <div>{proposal.description}</div>
                   <div className="text-sideColor">${proposal.price}</div>
-                  {item.proposal.accepted &&
-                    (index < numberOfReleased ? (
+                  {item.proposal.accepted ? (
+                    index < numberOfReleased ? (
                       <div className="text-green-300 col-span-2 text-center w-fit px-7 py-1">Released</div>
                     ) : (
                       <div className="place-self-start flex items-center gap-1">
-                        <div className="cursor-pointer connect-bg text-center rounded-lg w-fit px-7 py-1">Submit</div>
+                        {/* <div className="cursor-pointer connect-bg text-center rounded-lg w-fit px-7 py-1">Submit</div> */}
                       </div>
-                    ))}
+                    )
+                  ) : (
+                    <div>
+                      <div className="place-self-start flex items-center gap-1">
+                        {/* <div className="cursor-pointer connect-bg text-center rounded-lg w-fit px-7 py-1">Submit</div> */}
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

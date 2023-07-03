@@ -79,9 +79,9 @@ const JobDetail = () => {
     },
   });
   const proposalDetailQuery = useQuery({
+    enabled: allProposalsQuery.isSuccess && selectedProposal != "-1",
     refetchOnMount: true,
     queryKey: ["JobDetail", "proposalDetailQuery", selectedProposal],
-    enabled: allProposalsQuery.isSuccess && selectedProposal != "-1",
     queryFn: () => getProposal(selectedProposal),
     onSuccess: data => {
       setMilestones(data.data.detailed_proposal.milestones);

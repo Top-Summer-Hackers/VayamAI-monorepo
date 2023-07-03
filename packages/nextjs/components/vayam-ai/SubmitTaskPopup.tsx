@@ -36,6 +36,7 @@ export default function MyModal({ isOpen, setIsOpen }: MyModalProps) {
     mutationFn: submitNewTask,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["allTasks"] });
+      queryClient.invalidateQueries({ queryKey: ["ClientDashboard"] });
       setTaskInformation({
         title: "",
         start_time: "",
