@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import Loading from "../Loading";
 import SomethingWentWrong from "../SomethingWentWrong";
 import ProviderPreview from "./ProviderPreview";
@@ -7,11 +7,13 @@ import { useQuery } from "@tanstack/react-query";
 import { useAccount } from "wagmi";
 import { getAllProposals } from "~~/api/vayam-ai/proposal";
 import { getAllTasks } from "~~/api/vayam-ai/tasks";
+import VayamAIContext from "~~/context/context";
 import { Proposal } from "~~/types/vayam-ai/Proposal";
 import { TaskItem } from "~~/types/vayam-ai/Task";
 
 const ProviderDashboard = () => {
   const { address } = useAccount();
+  const { authenticationCredentials } = useContext(VayamAIContext);
 
   const [proposals, setProposals] = useState<Proposal[]>([]);
   const [items, setItems] = useState<
@@ -54,7 +56,9 @@ const ProviderDashboard = () => {
     queryKey: ["ProviderDashboard", "providerProposal", address],
     queryFn: () => getAllProposals(),
     onSuccess: data => {
-      const proposals = data.proposals.filter((proposal: Proposal) => proposal.freelancer_id == address);
+      const proposals = data.proposals.filter(
+        (proposal: Proposal) => proposal.freelancer_id == authenticationCredentials.id,
+      );
       setProposals(proposals);
       allTasksQuery.refetch();
     },

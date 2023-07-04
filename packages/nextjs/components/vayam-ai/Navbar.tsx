@@ -75,7 +75,8 @@ const Navbar = () => {
               {userType != undefined &&
                 userType === clientKeccak256 &&
                 authenticationCredentials.id != "" &&
-                authenticationCredentials.user_name != "" && (
+                authenticationCredentials.user_name != "" &&
+                authenticationCredentials.id == address?.toString() && (
                   <div onClick={() => setIsSubmitTaskOpen(true)} className="font-semibold cursor-pointer">
                     + add job
                   </div>

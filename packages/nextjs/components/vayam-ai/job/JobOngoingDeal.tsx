@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import Link from "next/link";
 import { ApprovePopUp, RatingPopUp } from "..";
 import { escrow } from "../../../constant/abi.json";
 import { toast } from "react-hot-toast";
 import truncateEthAddress from "truncate-eth-address";
 import { useAccount, useContract, useProvider, useSigner } from "wagmi";
+import VayamAIContext from "~~/context/context";
 import { useScaffoldContractRead, useScaffoldContractWrite } from "~~/hooks/scaffold-eth";
 import { Deal } from "~~/types/vayam-ai/Deals";
 
@@ -18,6 +19,7 @@ const JobOngoingDeal = ({ deal, setIsCreateDealPopUp, setCurrentDeal }: JobOngoi
   const { address } = useAccount();
   const { data: signer } = useSigner();
   const provider = useProvider();
+  const { authenticationCredentials } = useContext(VayamAIContext);
 
   const [isApproveOpen, setIsApproveOpen] = useState(false);
   const [isRatingOpen, setIsRatingOpen] = useState(false);
@@ -120,7 +122,9 @@ const JobOngoingDeal = ({ deal, setIsCreateDealPopUp, setCurrentDeal }: JobOngoi
         <div className="flex flex-col justify-center w-full h-full ">${deal.price}</div>
         <div>
           {/* show create deal */}
-          {deal.freelancer_id == address && deal.address == "0x0" ? (
+          {deal.freelancer_id == address &&
+          deal.address == "0x0" &&
+          authenticationCredentials.id == deal.freelancer_id ? (
             <div
               onClick={() => {
                 setIsCreateDealPopUp(true);
@@ -132,13 +136,19 @@ const JobOngoingDeal = ({ deal, setIsCreateDealPopUp, setCurrentDeal }: JobOngoi
             </div>
           ) : null}
           {/* show waiting for acknowledge */}
-          {deal.freelancer_id == address && deal.address != "0x0" && invoice?.isAcknowledged == false ? (
+          {(deal.freelancer_id == address || deal.freelancer_id == authenticationCredentials.id) &&
+          authenticationCredentials.id != "" &&
+          deal.address != "0x0" &&
+          invoice?.isAcknowledged == false ? (
             <div className="text-sm mt-1 flex flex-col justify-center w-fit rounded-full px-5 h-fit font-semibold py-1 connect-bg">
               Waiting Acknowledge
             </div>
           ) : null}
           {/* show acknowledge button for client */}
-          {deal.client_id == address && deal.address != "0x0" && invoice?.isAcknowledged == false ? (
+          {deal.client_id == address &&
+          authenticationCredentials.id != "" &&
+          deal.address != "0x0" &&
+          invoice?.isAcknowledged == false ? (
             <div
               onClick={handleAcknowledge}
               className="cursor-pointer text-sm mt-1 flex flex-col justify-center w-fit rounded-full px-5 h-fit font-semibold py-1 connect-bg"
@@ -151,12 +161,16 @@ const JobOngoingDeal = ({ deal, setIsCreateDealPopUp, setCurrentDeal }: JobOngoi
             (parseInt(String(terminationTime)) > Date.now() || canCloseDeal) &&
             deal.freelancer_id == address &&
             deal.address != "0x0" &&
+            authenticationCredentials.id != "" &&
+            deal.freelancer_id == authenticationCredentials.id &&
             invoice?.isAcknowledged == true &&
             invoice?.isClosedByFreelancer == false) ||
           (terminationTime != "0" &&
             (parseInt(String(terminationTime)) > Date.now() || canCloseDeal) &&
             deal.client_id == address &&
             deal.address != "0x0" &&
+            authenticationCredentials.id != "" &&
+            deal.client_id == authenticationCredentials.id &&
             invoice?.isAcknowledged == true &&
             invoice?.isClosedByClient == false) ? (
             <div
@@ -170,15 +184,17 @@ const JobOngoingDeal = ({ deal, setIsCreateDealPopUp, setCurrentDeal }: JobOngoi
           {(terminationTime != "0" &&
             parseInt(String(terminationTime)) < Date.now() &&
             canCloseDeal == false &&
-            deal.freelancer_id == address &&
+            (deal.freelancer_id == address || deal.freelancer_id == authenticationCredentials.id) &&
             deal.address != "0x0" &&
+            authenticationCredentials.id != "" &&
             invoice?.isAcknowledged == true &&
             invoice?.isClosedByFreelancer == false) ||
           (terminationTime != "0" &&
             parseInt(String(terminationTime)) < Date.now() &&
             canCloseDeal == false &&
-            deal.client_id == address &&
+            (deal.client_id || deal.client_id == authenticationCredentials.id) == address &&
             deal.address != "0x0" &&
+            authenticationCredentials.id != "" &&
             invoice?.isAcknowledged == true &&
             invoice?.isClosedByClient == false) ? (
             <div className="text-green-300 flex flex-col justify-center w-full h-full font-semibold">Deal Ongoing</div>
@@ -187,6 +203,7 @@ const JobOngoingDeal = ({ deal, setIsCreateDealPopUp, setCurrentDeal }: JobOngoi
           {/* show review completed word*/}
           {deal.client_id == address &&
           deal.address != "0x0" &&
+          authenticationCredentials.id != "" &&
           invoice?.isAcknowledged == true &&
           invoice?.isClosedByClient == true ? (
             <div className="text-green-300 flex flex-col justify-center w-full h-full font-semibold">
@@ -195,6 +212,7 @@ const JobOngoingDeal = ({ deal, setIsCreateDealPopUp, setCurrentDeal }: JobOngoi
           ) : null}
           {deal.freelancer_id == address &&
           deal.address != "0x0" &&
+          authenticationCredentials.id != "" &&
           invoice?.isAcknowledged == true &&
           invoice?.isClosedByFreelancer == true ? (
             <div className="text-green-300 flex flex-col justify-center w-full h-full font-semibold">
@@ -203,11 +221,13 @@ const JobOngoingDeal = ({ deal, setIsCreateDealPopUp, setCurrentDeal }: JobOngoi
           ) : null}
         </div>
       </div>
-      {deal.address != "0x0" && (deal.freelancer_id == address || deal.client_id == address) && (
-        <Link href={`/deal/${deal.id}/${deal.address}`} className="text-sideColor text-sm cursor-pointer">
-          View Incoive
-        </Link>
-      )}
+      {deal.address != "0x0" &&
+        (deal.freelancer_id == address || deal.client_id == address) &&
+        authenticationCredentials.id != "" && (
+          <Link href={`/deal/${deal.id}/${deal.address}`} className="text-sideColor text-sm cursor-pointer">
+            View Incoive
+          </Link>
+        )}
     </div>
   );
 };

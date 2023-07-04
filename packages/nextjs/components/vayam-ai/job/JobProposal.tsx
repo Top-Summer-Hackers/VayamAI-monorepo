@@ -1,8 +1,8 @@
 import React, { useContext } from "react";
 import { QueryObserverResult, RefetchOptions, RefetchQueryFilters, useMutation } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
 import truncateEthAddress from "truncate-eth-address";
-import { useAccount, useQueryClient } from "wagmi";
 import { approveProposal } from "~~/api/vayam-ai/proposal";
 import VayamAIContext from "~~/context/context";
 import { ProposalItem } from "~~/types/vayam-ai/Proposal";
@@ -30,8 +30,7 @@ const JobProposal = ({
   clientAddr,
 }: JobProposalProps) => {
   const queryClient = useQueryClient();
-  const { address } = useAccount();
-  const { userType, clientKeccak256 } = useContext(VayamAIContext);
+  const { userType, clientKeccak256, authenticationCredentials } = useContext(VayamAIContext);
 
   /*************************************************************
    * Backend interaction
@@ -66,7 +65,9 @@ const JobProposal = ({
         <div>{truncateEthAddress(freelancerAddr)}</div>
       </div>
       <div className="flex flex-col justify-center w-full h-full ">${price}</div>
-      {userType == clientKeccak256 && address == clientAddr ? (
+      {userType == clientKeccak256 &&
+      authenticationCredentials.id != "" &&
+      authenticationCredentials.id == clientAddr ? (
         isAcceptedAlready ? (
           <button className="cursor-not-allowed flex flex-col justify-center w-fit rounded-full px-5 h-fit font-semibold py-2 border border-primary">
             {accepted ? "Accepted" : "Accept"}

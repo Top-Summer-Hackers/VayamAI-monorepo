@@ -66,14 +66,26 @@ export const VayamAIContextProvider = ({ children }: PropsWithChildren) => {
   const { data: userId, refetch: userIdRefetch } = useScaffoldContractRead({
     contractName: "VayamAI",
     functionName: "userIds",
-    args: [address === undefined ? undefined : address] as readonly [string | undefined],
+    args: [
+      authenticationCredentials.id === ""
+        ? address === undefined
+          ? undefined
+          : address
+        : authenticationCredentials.id,
+    ] as readonly [string | undefined],
   });
 
   // read the user type, (provider or client)
   const { data: userType, isLoading: userTypeLoading } = useScaffoldContractRead({
     contractName: "VayamAI",
     functionName: "userType",
-    args: [address === undefined ? undefined : address] as readonly [string | undefined],
+    args: [
+      authenticationCredentials.id === ""
+        ? address === undefined
+          ? undefined
+          : address
+        : authenticationCredentials.id,
+    ] as readonly [string | undefined],
   });
 
   // console.log(userType);

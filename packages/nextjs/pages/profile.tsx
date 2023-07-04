@@ -7,12 +7,12 @@ import VayamAIContext from "~~/context/context";
 
 const Profile = () => {
   const { address } = useAccount();
-  const { userType, userTypeLoading } = useContext(VayamAIContext);
+  const { userType, userTypeLoading, authenticationCredentials } = useContext(VayamAIContext);
 
   return (
     <div className="pb-24">
       <div>
-        {address === undefined ? (
+        {authenticationCredentials.id === "" || address == undefined ? (
           <PleaseConnectWallet />
         ) : (
           <div>
@@ -24,11 +24,11 @@ const Profile = () => {
               <div className="mt-10 text-center text-3xl font-bold">Please register first!</div>
             ) : userType === "0x" + keccak256("freelancer").toString("hex") ? (
               <div>
-                <ProviderProfile freelancerAddr={address} />
+                <ProviderProfile freelancerAddr={authenticationCredentials.id} />
               </div>
             ) : (
               <div>
-                <ClientProfile clientAddr={address} />
+                <ClientProfile clientAddr={authenticationCredentials.id} />
               </div>
             )}
           </div>

@@ -19,7 +19,7 @@ import { Milestone, Proposal, ProposalItem } from "~~/types/vayam-ai/Proposal";
 const InvoiceDetail = () => {
   const router = useRouter();
   const { address: walletAddress } = useAccount();
-  const { userType, clientKeccak256, freelancerKeccak256 } = useContext(VayamAIContext);
+  const { userType, clientKeccak256, freelancerKeccak256, authenticationCredentials } = useContext(VayamAIContext);
   const { data: signer } = useSigner();
   const provider = useProvider();
 
@@ -182,7 +182,10 @@ const InvoiceDetail = () => {
               Invoice between {truncateEthAddress(invoice?.client || "")} and{" "}
               {truncateEthAddress(invoice?.freelancer || "")}
             </div>
-            {userType != undefined && userType == clientKeccak256 && invoice?.client == walletAddress ? (
+            {userType != undefined &&
+            userType == clientKeccak256 &&
+            invoice?.client == walletAddress &&
+            authenticationCredentials.id != "" ? (
               <div
                 onClick={() => setIsTopUpOpen(true)}
                 className="gap-1 flex items-center cursor-pointer mt-1 border border-primary px-4 py-1 rounded-full "
@@ -266,7 +269,10 @@ const InvoiceDetail = () => {
                           <div className="font-semibold flex">
                             {milestone.description}{" "}
                             {milestone.link != "" &&
-                            (deal.client_id == walletAddress || deal.freelancer_id == walletAddress) ? (
+                            (deal.client_id == walletAddress || deal.freelancer_id == walletAddress) &&
+                            (deal.client_id == authenticationCredentials.id ||
+                              deal.freelancer_id == authenticationCredentials.id) &&
+                            authenticationCredentials.id != "" ? (
                               <a
                                 href={`${milestone.link.slice(0, milestone.link.indexOf(":") + 1)}${milestone.link
                                   .slice(milestone.link.indexOf(":") + 1)
@@ -290,6 +296,7 @@ const InvoiceDetail = () => {
                         userType == clientKeccak256 &&
                         invoice?.client == walletAddress &&
                         invoice?.isAcknowledged &&
+                        authenticationCredentials.id != "" &&
                         currentMileStone &&
                         parseInt(String(currentMileStone)) == index ? (
                           <div
@@ -301,7 +308,8 @@ const InvoiceDetail = () => {
                         ) : null}
                         {userType != undefined &&
                         userType == freelancerKeccak256 &&
-                        invoice?.freelancer == walletAddress &&
+                        (invoice?.freelancer == walletAddress || invoice?.freelancer == authenticationCredentials.id) &&
+                        authenticationCredentials.id != "" &&
                         invoice?.isAcknowledged &&
                         currentMileStone &&
                         milestone.link == "" &&
@@ -318,7 +326,8 @@ const InvoiceDetail = () => {
                         ) : null}
                         {parseInt(String(numberOfReleased)) <= index &&
                           milestone.link != "" &&
-                          deal.freelancer_id == walletAddress && (
+                          (deal.freelancer_id == walletAddress || deal.freelancer_id == authenticationCredentials.id) &&
+                          authenticationCredentials.id != "" && (
                             <div className="text-green-300 px-3 py-1">Submitted</div>
                           )}
                         {numberOfReleased && parseInt(String(numberOfReleased)) > index && (

@@ -8,11 +8,11 @@ import VayamAIContext from "~~/context/context";
 
 const Dashboard = () => {
   const { address } = useAccount();
-  const { userType, userTypeLoading } = useContext(VayamAIContext);
+  const { userType, userTypeLoading, authenticationCredentials } = useContext(VayamAIContext);
 
   return (
     <div>
-      {address === undefined ? (
+      {authenticationCredentials.id === "" || address === undefined ? (
         <PleaseConnectWallet />
       ) : (
         <div>

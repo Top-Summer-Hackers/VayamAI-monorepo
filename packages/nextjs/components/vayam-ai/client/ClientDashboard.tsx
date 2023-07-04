@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { Loading } from "..";
 import SomethingWentWrong from "../SomethingWentWrong";
 import TaskPreview from "./TaskPreview";
@@ -6,10 +6,13 @@ import { useQuery } from "@tanstack/react-query";
 import { useAccount } from "wagmi";
 import { getAllTasks } from "~~/api/vayam-ai/tasks";
 import { TaskList } from "~~/components/vayam-ai/provider";
+import VayamAIContext from "~~/context/context";
 import { TaskItem } from "~~/types/vayam-ai/Task";
 
 const ClientDashboard = () => {
   const { address } = useAccount();
+  const { authenticationCredentials } = useContext(VayamAIContext);
+
   // const [isReviewOpen, setIsReviewOpen] = useState(false);
   const [clientTasks, setClientTasks] = useState<TaskItem[]>([]);
   const [currentTask, setCurrentTask] = useState<TaskItem>({
@@ -32,7 +35,7 @@ const ClientDashboard = () => {
     queryKey: ["ClientDashboard", "jobDetail", address],
     queryFn: () => getAllTasks(),
     onSuccess: data => {
-      const jobs = data?.tasks.filter((task: TaskItem) => task.client_id == address);
+      const jobs = data?.tasks.filter((task: TaskItem) => task.client_id == authenticationCredentials.id);
       setClientTasks(jobs);
       if (jobs.length > 0) {
         setCurrentTask(jobs[0]);

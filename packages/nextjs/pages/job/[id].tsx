@@ -2,6 +2,7 @@ import React, { useContext, useState } from "react";
 import { useRouter } from "next/router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { IoMdAdd } from "react-icons/io";
+import { useAccount } from "wagmi";
 import { getAllDeals } from "~~/api/vayam-ai/deal";
 import { getAllProposals, getProposal } from "~~/api/vayam-ai/proposal";
 import { getAllTasks } from "~~/api/vayam-ai/tasks";
@@ -15,8 +16,9 @@ import { TaskItem } from "~~/types/vayam-ai/Task";
 
 const JobDetail = () => {
   const router = useRouter();
+  const { address: walletAddress } = useAccount();
 
-  const { userType, freelancerKeccak256 } = useContext(VayamAIContext);
+  const { userType, freelancerKeccak256, authenticationCredentials } = useContext(VayamAIContext);
   const queryClient = useQueryClient();
 
   const { id } = router.query;
@@ -130,14 +132,16 @@ const JobDetail = () => {
           {/* job title */}
           <div className="flex items-center justify-between mt-5">
             <div className="text-3xl font-bold mt-5">{taskDetail?.title}</div>
-            {userType != undefined && userType == freelancerKeccak256 && (
-              <div
-                onClick={() => setIsSubmitProposalOpen(true)}
-                className="cursor-pointer flex-center gap-1 border border-primary rounded-full px-5 py-2"
-              >
-                Submit Proposal <IoMdAdd />
-              </div>
-            )}
+            {userType != undefined &&
+              userType == freelancerKeccak256 &&
+              authenticationCredentials.id == walletAddress?.toString() && (
+                <div
+                  onClick={() => setIsSubmitProposalOpen(true)}
+                  className="cursor-pointer flex-center gap-1 border border-primary rounded-full px-5 py-2"
+                >
+                  Submit Proposal <IoMdAdd />
+                </div>
+              )}
           </div>
           {/* time range + job description */}
           <div className="mt-5 font-semibold text-lg">
